@@ -35,7 +35,6 @@ public class LoginController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        System.out.println("请求到达");
         doProcessRequest(req, resp);
     }
 
