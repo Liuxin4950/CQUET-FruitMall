@@ -16,10 +16,10 @@ public class DataAccessImpl implements IDataAccess {
     public <T> List<T> getList(Class<T> clazz) throws Exception {
         String clsName = StringUtils.toUnderScoreCase(clazz.getSimpleName());
         String sql = null;
-        if ("order".equals(clsName)) {
-            sql = "SELECT * FROM `order` where delFlag= 0";
+        if ("orders".equals(clsName)) {
+            sql = "SELECT * FROM orders where delFlag= 0 OR delFlag IS NULL";
         } else {
-            sql = "SELECT * FROM " + clsName + " where delFlag= 0";
+            sql = "SELECT * FROM " + clsName + " where delFlag= 0 OR delFlag IS NULL";
         }
         return new ObjectUtil<T>().getList(sql, clazz);
     }
@@ -28,10 +28,10 @@ public class DataAccessImpl implements IDataAccess {
     public <T> T getEntityById(Class<T> clazz, Integer id) throws Exception {
         String sql = null;
         String clsName = StringUtils.toUnderScoreCase(clazz.getSimpleName());
-        if ("order".equals(clsName)) {
-            sql = "SELECT * FROM `order` where id = ? and delFlag= 0";
+        if ("orders".equals(clsName)) {
+            sql = "SELECT * FROM orders where id = ? and (delFlag= 0 OR delFlag IS NULL)";
         } else {
-            sql = "SELECT * FROM " + clsName + " where id = ? and delFlag= 0";
+            sql = "SELECT * FROM " + clsName + " where id = ? and (delFlag= 0 OR delFlag IS NULL)";
         }
         return new ObjectUtil<T>().getOne(sql, clazz, id);
     }

@@ -1,9 +1,12 @@
 package org.example.emarketmall.utils;
 
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,52 +57,21 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
      * @throws InstantiationException
      */
     public static <T> T copyMap2Object(Map src, Class<T> target) throws IllegalAccessException, InstantiationException {
-        Field[] fields = target.getDeclaredFields();
+        Class<?> clazz = target;
+        Field[] fields = new Field[0];
+        while (clazz != Object.class) {
+            fields = ArrayUtils.addAll(fields, clazz.getDeclaredFields());
+            clazz = clazz.getSuperclass();
+        }
         T ret = target.newInstance();
         for (Field field : fields) {
-            Object value;
+            Object value ;
             if ((value = src.get(field.getName())) != null) {
+//                field.setAccessible(true);
+//                field.set(ret, value);
+                //设置对象的访问权限，保证对private的属性的访问
                 field.setAccessible(true);
-                // 处理类型转换
-                if (field.getType() == java.util.Date.class && value instanceof String) {
-                    try {
-                        // 尝试解析日期字符串
-                        value = DateUtils.dateTime(DateUtils.YYYY_MM_DD_HH_MM_SS, (String) value);
-                    } catch (Exception e) {
-                        // 如果解析失败，尝试其他格式
-                        try {
-                            value = DateUtils.dateTime("yyyy-MM-dd", (String) value);
-                        } catch (Exception ex) {
-                            System.err.println("日期格式解析失败: " + value);
-                            continue;
-                        }
-                    }
-                } else if (field.getType() == Boolean.class && value instanceof String) {
-                    // 处理Boolean类型转换
-                    String strValue = (String) value;
-                    if ("1".equals(strValue) || "true".equalsIgnoreCase(strValue)) {
-                        value = true;
-                    } else if ("0".equals(strValue) || "false".equalsIgnoreCase(strValue)) {
-                        value = false;
-                    }
-                } else if (field.getType() == Integer.class && value instanceof String) {
-                    // 处理Integer类型转换
-                    try {
-                        value = Integer.parseInt((String) value);
-                    } catch (NumberFormatException e) {
-                        System.err.println("整数格式解析失败: " + value);
-                        continue;
-                    }
-                } else if (field.getType() == java.math.BigDecimal.class && value instanceof String) {
-                    // 处理BigDecimal类型转换
-                    try {
-                        value = new java.math.BigDecimal((String) value);
-                    } catch (NumberFormatException e) {
-                        System.err.println("BigDecimal格式解析失败: " + value);
-                        continue;
-                    }
-                }
-                field.set(ret, value);
+                field.set(ret, convert(value, field.getType()));
             }
         }
         return ret;
@@ -118,13 +90,13 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
         }
         List<String> props = getBeanProperties(obj);
         int count = 0;
-        //delFlag->0 getFieldValueByName返回null
         for (String prop : props) {
             if (StringUtils.isEmpty(getFieldValueByName(prop, obj))) {
                 count++;
             }
         }
-        return count >= props.size();
+        //排除delFlag属性
+        return count >= props.size() - 1;
     }
 
     /**
@@ -216,22 +188,33 @@ public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
      * @return 属性值
      */
     public static String getFieldValueByName(String fieldName, Object object) {
-        Field field = null;
         String ret = null;
-        Class<?> clazz = object.getClass();
-        //从当前的类开始找，没找到再从父类中找。
-        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
-            try {
-                field = clazz.getDeclaredField(fieldName);
-                field.setAccessible(true);
-                ret = (String) field.get(object);
-            } catch (Exception e) {
-                // 这里甚么都不能抛出去。
-                // 如果这里的异常打印或者往外抛，则就不会进入
-            }
+        try {
+            ret = PropertyUtils.getProperty(object, fieldName).toString();
+        } catch (Exception e) {
+
         }
         return ret;
 
+    }
+
+    /**
+     * Field类型转换
+     */
+    private static <T> T convert(Object obj, Class<T> type) {
+        if (type.equals(Integer.class)) {
+            return (T) (StringUtils.isEmpty(obj.toString())?null:new Integer(obj.toString()));
+        } else if (type.equals(Long.class)) {
+            return (T) (StringUtils.isEmpty(obj.toString())?null:new Long(obj.toString()));
+        } else if (type.equals(Float.class)) {
+            return (T) (StringUtils.isEmpty(obj.toString())?null:new Float(obj.toString()));
+        } else if (type.equals(Double.class)) {
+            return (T) (StringUtils.isEmpty(obj.toString())?null:new Double(obj.toString()));
+        } else if (type.equals(BigDecimal.class)) {
+            return (T) (StringUtils.isEmpty(obj.toString())?null:new BigDecimal(obj.toString()));
+        } else{
+            return (T) obj.toString();
+        }
     }
 
 }

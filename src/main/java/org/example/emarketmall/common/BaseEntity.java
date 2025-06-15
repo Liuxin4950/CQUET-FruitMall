@@ -31,7 +31,7 @@ public class BaseEntity implements Serializable
     private String remark;
 
     /** 删除状态 0正常，1已删除。默认值0 */
-    private int delFlag = 0;
+    private Integer delFlag = 0;
 
     /**
      * 通用唯一识别码，是由一组32位数的16进制数字所构成
@@ -84,11 +84,11 @@ public class BaseEntity implements Serializable
         this.updatedTime = updatedTime;
     }
 
-    public int getDelFlag() {
+    public Integer getDelFlag() {
         return delFlag;
     }
 
-    public void setDelFlag(int delFlag) {
+    public void setDelFlag(Integer delFlag) {
         this.delFlag = delFlag;
     }
 
