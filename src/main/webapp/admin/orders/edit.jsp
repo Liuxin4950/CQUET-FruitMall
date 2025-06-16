@@ -34,6 +34,18 @@
             </div>
         </div>
         <div class="form-group">
+            <label class="col-sm-3 control-label">用户名称：</label>
+            <div class="col-sm-8">
+                <input class="form-control" value="${order.userName}" type="text" readonly>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">用户邮箱：</label>
+            <div class="col-sm-8">
+                <input class="form-control" value="${order.userEmail}" type="text" readonly>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-sm-3 control-label is-required">收货人：</label>
             <div class="col-sm-8">
                 <input name="shippingUser" class="form-control" value="${order.shippingUser}" type="text" required>

@@ -6,6 +6,7 @@ import org.example.emarketmall.dao.impl.OrderDetailDaoImpl;
 import org.example.emarketmall.dao.impl.OrdersDaoImpl;
 import org.example.emarketmall.entity.OrderDetail;
 import org.example.emarketmall.entity.Orders;
+import org.example.emarketmall.resl.OrdersResl;
 import org.example.emarketmall.service.OrdersService;
 import org.example.emarketmall.utils.DateUtils;
 import org.example.emarketmall.utils.StringUtils;
@@ -29,7 +30,7 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<Orders> selectOrdersList(Orders orders) {
+    public List<OrdersResl> selectOrdersList(Orders orders) {
         try {
             return ordersDao.selectOrdersList(orders);
         } catch (Exception e) {
@@ -39,9 +40,9 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Orders selectOrdersById(Integer orderId) {
+    public OrdersResl selectOrdersById(Integer orderId) {
         try {
-            Orders orders = ordersDao.selectOrdersById(orderId);
+            OrdersResl orders = ordersDao.selectOrdersById(orderId);
             if (orders != null) {
                 // 查询订单详情
                 List<OrderDetail> orderDetails = orderDetailDao.selectOrderDetailByOrderId(orderId);
@@ -55,9 +56,9 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public Orders selectOrdersByOrderNum(String orderNum) {
+    public OrdersResl selectOrdersByOrderNum(String orderNum) {
         try {
-            Orders orders = ordersDao.selectOrdersByOrderNum(orderNum);
+            OrdersResl orders = ordersDao.selectOrdersByOrderNum(orderNum);
             if (orders != null) {
                 // 查询订单详情
                 List<OrderDetail> orderDetails = orderDetailDao.selectOrderDetailByOrderId(orders.getId());
@@ -71,7 +72,7 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<Orders> selectOrdersByUserId(Integer userId) {
+    public List<OrdersResl> selectOrdersByUserId(Integer userId) {
         try {
             return ordersDao.selectOrdersByUserId(userId);
         } catch (Exception e) {
@@ -81,7 +82,7 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public List<Orders> selectOrdersByStatus(String orderStatus) {
+    public List<OrdersResl> selectOrdersByStatus(String orderStatus) {
         try {
             // 将String类型的orderStatus转换为Integer类型
             Integer statusCode = convertOrderStatusToCode(orderStatus);

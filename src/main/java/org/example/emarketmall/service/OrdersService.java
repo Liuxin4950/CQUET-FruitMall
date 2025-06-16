@@ -1,6 +1,7 @@
 package org.example.emarketmall.service;
 
 import org.example.emarketmall.entity.Orders;
+import org.example.emarketmall.resl.OrdersResl;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface OrdersService {
      * @param orders 订单信息
      * @return 订单信息集合信息
      */
-    List<Orders> selectOrdersList(Orders orders);
+    List<OrdersResl> selectOrdersList(Orders orders);
 
     /**
      * 通过订单ID查询订单
@@ -25,7 +26,7 @@ public interface OrdersService {
      * @param orderId 订单ID
      * @return 订单对象信息
      */
-    Orders selectOrdersById(Integer orderId);
+    OrdersResl selectOrdersById(Integer orderId);
 
     /**
      * 通过订单编号查询订单
@@ -33,7 +34,7 @@ public interface OrdersService {
      * @param orderNum 订单编号
      * @return 订单对象信息
      */
-    Orders selectOrdersByOrderNum(String orderNum);
+    OrdersResl selectOrdersByOrderNum(String orderNum);
 
     /**
      * 通过用户ID查询订单列表
@@ -41,7 +42,7 @@ public interface OrdersService {
      * @param userId 用户ID
      * @return 订单列表
      */
-    List<Orders> selectOrdersByUserId(Integer userId);
+    List<OrdersResl> selectOrdersByUserId(Integer userId);
 
     /**
      * 通过订单状态查询订单列表
@@ -49,7 +50,7 @@ public interface OrdersService {
      * @param orderStatus 订单状态
      * @return 订单列表
      */
-    List<Orders> selectOrdersByStatus(String orderStatus);
+    List<OrdersResl> selectOrdersByStatus(String orderStatus);
 
     /**
      * 新增订单

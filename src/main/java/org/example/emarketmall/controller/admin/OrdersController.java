@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.example.emarketmall.common.AjaxResult;
 import org.example.emarketmall.common.TableDataInfo;
 import org.example.emarketmall.entity.Orders;
+import org.example.emarketmall.resl.OrdersResl;
 import org.example.emarketmall.service.OrdersService;
 import org.example.emarketmall.service.impl.OrdersServiceImpl;
 import org.example.emarketmall.utils.BeanUtils;
@@ -53,7 +54,7 @@ public class OrdersController extends HttpServlet {
             ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("操作选项opt内容异常")));
             return;
         }
-
+        System.out.println("查询参数:"+req);
         Orders orders = ServletUtils.getObjectFromPayload(req, Orders.class);
         if (BeanUtils.isEmpty(orders)) {
             orders = null;
@@ -79,7 +80,7 @@ public class OrdersController extends HttpServlet {
                         ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("编辑ID内容异常")));
                         return;
                     } else {
-                        Orders order = ordersService.selectOrdersById(Integer.parseInt(id));
+                        OrdersResl order = ordersService.selectOrdersById(Integer.parseInt(id));
                         req.setAttribute("order", order);
                         req.getRequestDispatcher("/admin/orders/edit.jsp").forward(req, resp);
                         return;
@@ -104,7 +105,7 @@ public class OrdersController extends HttpServlet {
                     ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("详情ID内容异常")));
                     return;
                 } else {
-                    Orders order = ordersService.selectOrdersById(Integer.parseInt(id));
+                    OrdersResl order = ordersService.selectOrdersById(Integer.parseInt(id));
                     req.setAttribute("order", order);
                     req.getRequestDispatcher("/admin/orders/detail.jsp").forward(req, resp);
                     return;
@@ -142,9 +143,11 @@ public class OrdersController extends HttpServlet {
 
     private AjaxResult editOrders(String id, Orders orders) {
         if (StringUtils.isNotEmpty(id)) {
-            Orders destOrders = ordersService.selectOrdersById(Integer.parseInt(id));
-            if (destOrders != null) {
-                // 更新订单信息
+            OrdersResl destOrdersResl = ordersService.selectOrdersById(Integer.parseInt(id));
+            if (destOrdersResl != null) {
+                // 创建Orders对象用于更新
+                Orders destOrders = new Orders();
+                destOrders.setId(destOrdersResl.getId());
                 destOrders.setShippingUser(orders.getShippingUser());
                 destOrders.setAddress(orders.getAddress());
                 destOrders.setPaymentMethod(orders.getPaymentMethod());
@@ -216,8 +219,11 @@ public class OrdersController extends HttpServlet {
 
     private AjaxResult shipOrder(String id) {
         if (StringUtils.isNotEmpty(id)) {
-            Orders orders = ordersService.selectOrdersById(Integer.parseInt(id));
-            if (orders != null && orders.getOrderStatus() == 2) { // 只有已支付的订单才能发货
+            OrdersResl ordersResl = ordersService.selectOrdersById(Integer.parseInt(id));
+            if (ordersResl != null && ordersResl.getOrderStatus() == 2) { // 只有已支付的订单才能发货
+                // 创建Orders对象用于更新
+                Orders orders = new Orders();
+                orders.setId(ordersResl.getId());
                 orders.setOrderStatus(3); // 已发货
                 orders.setShipTime(new java.util.Date()); // 设置发货时间
                 if (ordersService.updateOrders(orders) > 0) {
@@ -231,7 +237,7 @@ public class OrdersController extends HttpServlet {
     }
 
     private TableDataInfo list(Orders orders) {
-        List<Orders> ordersList = ordersService.selectOrdersList(orders);
+        List<OrdersResl> ordersList = ordersService.selectOrdersList(orders);
         if (ordersList != null) {
             return TableDataInfo.getDataTable(ordersList);
         }

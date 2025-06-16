@@ -1,6 +1,7 @@
 package org.example.emarketmall.dao;
 
 import org.example.emarketmall.entity.Orders;
+import org.example.emarketmall.resl.OrdersResl;
 
 import java.util.List;
 
@@ -17,7 +18,7 @@ public interface OrdersDao {
      * @param orders 订单信息
      * @return 订单信息集合信息
      */
-    List<Orders> selectOrdersList(Orders orders) throws Exception;
+    List<OrdersResl> selectOrdersList(Orders orders) throws Exception;
 
     /**
      * 通过订单ID查询订单
@@ -25,7 +26,7 @@ public interface OrdersDao {
      * @param orderId 订单ID
      * @return 订单对象信息
      */
-    Orders selectOrdersById(Integer orderId) throws Exception;
+    OrdersResl selectOrdersById(Integer orderId) throws Exception;
 
     /**
      * 通过订单编号查询订单
@@ -33,7 +34,7 @@ public interface OrdersDao {
      * @param orderNum 订单编号
      * @return 订单对象信息
      */
-    Orders selectOrdersByOrderNum(String orderNum);
+    OrdersResl selectOrdersByOrderNum(String orderNum);
 
     /**
      * 通过用户ID查询订单列表
@@ -41,7 +42,7 @@ public interface OrdersDao {
      * @param userId 用户ID
      * @return 订单列表
      */
-    List<Orders> selectOrdersByUserId(Integer userId);
+    List<OrdersResl> selectOrdersByUserId(Integer userId);
 
     /**
      * 通过订单状态查询订单列表
@@ -49,7 +50,7 @@ public interface OrdersDao {
      * @param orderStatus 订单状态
      * @return 订单列表
      */
-    List<Orders> selectOrdersByStatus(Integer orderStatus);
+    List<OrdersResl> selectOrdersByStatus(Integer orderStatus);
 
     /**
      * 新增订单
@@ -100,7 +101,7 @@ public interface OrdersDao {
      * @param orderStatus 订单状态
      * @return 订单列表
      */
-    List<Orders> selectOrdersByUserIdAndStatus(Integer userId, Integer orderStatus);
+    List<OrdersResl> selectOrdersByUserIdAndStatus(Integer userId, Integer orderStatus);
 
     /**
      * 统计订单数量

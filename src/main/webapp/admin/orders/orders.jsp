@@ -168,14 +168,18 @@
                 field: 'orderNum',
                 title: '订单号'
             },
+            // {
+            //     field: 'userId',
+            //     title: '用户ID'
+            // },
             {
-                field: 'userId',
-                title: '用户ID'
+                field: 'userName',
+                title: '用户名称'
             },
-            {
-                field: 'shippingUser',
-                title: '收货人'
-            },
+            // {
+            //     field: 'shippingUser',
+            //     title: '收货人'
+            // },
             {
                 field: 'orderMoney',
                 title: '订单金额',

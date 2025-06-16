@@ -75,6 +75,17 @@
         var loginName = $("input[name='loginName']").val();
         var password = $("input[name='password']").val();
         var rememberMe = $("input[name='rememberme']").is(':checked');
+        
+        // 参数验证
+        if (!loginName || loginName.trim() === '') {
+            alert('请输入登录名');
+            return;
+        }
+        if (!password || password.trim() === '') {
+            alert('请输入密码');
+            return;
+        }
+        
         $.ajax({
             type: "post",
             url: "/login",
@@ -86,10 +97,25 @@
             dataType: "json",
             success: function (ret) {
                 if (ret.code == 0) {
-                    location.href = 'admin/index.jsp';
+                    // 根据用户类型跳转到不同页面
+                    if (ret.data && ret.data.userType === 'admin') {
+                        // 管理员跳转到管理员界面
+                        location.href = 'admin/index.jsp';
+                    } else {
+                        // 普通用户跳转到用户界面
+                        location.href = 'web/index.jsp';
+                    }
                 } else {
-                    $.modal.alertWarning(ret.msg);
+                    // 显示错误信息
+                    if (typeof $.modal !== 'undefined' && $.modal.alertWarning) {
+                        $.modal.alertWarning(ret.msg);
+                    } else {
+                        alert(ret.msg || '登录失败');
+                    }
                 }
+            },
+            error: function(xhr, status, error) {
+                alert('登录请求失败，请检查网络连接');
             }
         });
     }

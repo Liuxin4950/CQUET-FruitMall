@@ -1,6 +1,7 @@
 package org.example.emarketmall.dao.impl;
 
-import cqcet.aibd.soft.ObjectUtil;
+
+import cquet.aibd.soft.ObjectUtil;
 import org.example.emarketmall.dao.IDataAccess;
 import org.example.emarketmall.dao.UserInfoDao;
 import org.example.emarketmall.entity.UserInfo;

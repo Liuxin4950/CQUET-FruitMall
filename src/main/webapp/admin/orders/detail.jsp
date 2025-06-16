@@ -42,6 +42,24 @@
         <div class="row">
             <div class="col-sm-6">
                 <div class="form-group">
+                    <label class="col-sm-4 control-label">用户名称：</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" value="${order.userName}" type="text" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">用户邮箱：</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" value="${order.userEmail}" type="text" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="form-group">
                     <label class="col-sm-4 control-label">订单状态：</label>
                     <div class="col-sm-8">
                         <input class="form-control" value="${

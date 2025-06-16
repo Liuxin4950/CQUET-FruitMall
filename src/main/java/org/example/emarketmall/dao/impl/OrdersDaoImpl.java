@@ -1,8 +1,10 @@
 package org.example.emarketmall.dao.impl;
 
+import cquet.aibd.soft.ObjectUtil;
 import org.example.emarketmall.dao.OrdersDao;
 import org.example.emarketmall.entity.Orders;
-import cqcet.aibd.soft.ObjectUtil;
+import org.example.emarketmall.resl.OrdersResl;
+
 import org.example.emarketmall.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -20,20 +22,25 @@ public class OrdersDaoImpl implements OrdersDao {
     }
 
     @Override
-    public List<Orders> selectOrdersList(Orders orders) throws Exception {
+    public List<OrdersResl> selectOrdersList(Orders orders) throws Exception {
         // 如果orders对象不为空，说明有查询条件
         if (orders != null) {
             return selectOrdersByOrderParams(orders);
         }
-        String sql = "select id, order_num as orderNum, user_id as userId, shipping_user as shippingUser, " +
-                "address, payment_method as paymentMethod, order_money as orderMoney, " +
-                "shipping_money as shippingMoney, district_money as districtMoney, " +
-                "payment_money as paymentMoney, pay_time as payTime, receive_time as receiveTime, " +
-                "ship_time as shipTime, order_status as orderStatus, payment_transaction_id as paymentTransactionId, " +
-                "expected_delivery_time as expectedDeliveryTime, createdBy, createdTime, " +
-                "updatedBy, updatedTime, delFlag, remark from orders where (delFlag = 0 OR delFlag IS NULL) " +
-                "order by createdTime desc";
-        return new ObjectUtil<Orders>().getList(sql, Orders.class);
+        // 多表联查SQL，包含用户信息
+        String sql = "SELECT o.id, o.order_num as orderNum, o.user_id as userId, o.shipping_user as shippingUser, " +
+                "o.address, o.payment_method as paymentMethod, o.order_money as orderMoney, " +
+                "o.shipping_money as shippingMoney, o.district_money as districtMoney, " +
+                "o.payment_money as paymentMoney, o.pay_time as payTime, o.receive_time as receiveTime, " +
+                "o.ship_time as shipTime, o.order_status as orderStatus, o.payment_transaction_id as paymentTransactionId, " +
+                "o.expected_delivery_time as expectedDeliveryTime, o.createdBy, o.createdTime, " +
+                "o.updatedBy, o.updatedTime, o.delFlag, o.remark, " +
+                "u.name as userName, u.loginName as userLoginName, u.avatar as userAvatar, " +
+                "u.email as userEmail, u.phone as userPhone " +
+                "FROM orders o LEFT JOIN user_info u ON o.user_id = u.id " +
+                "WHERE (o.delFlag = 0 OR o.delFlag IS NULL) " +
+                "ORDER BY o.createdTime DESC";
+        return new ObjectUtil<OrdersResl>().getList(sql, OrdersResl.class);
     }
 
     /**
@@ -42,8 +49,8 @@ public class OrdersDaoImpl implements OrdersDao {
      * @param orders
      * @return
      */
-    private List<Orders> selectOrdersByOrderParams(Orders orders) throws Exception {
-        List<Orders> ordersList = new ArrayList<>();
+    private List<OrdersResl> selectOrdersByOrderParams(Orders orders) throws Exception {
+        List<OrdersResl> ordersList = new ArrayList<>();
         // 可查询的属性
         List<String> params = Arrays.asList("id", "orderNum", "userId", "orderStatus", "paymentMethod");
 
@@ -51,7 +58,7 @@ public class OrdersDaoImpl implements OrdersDao {
             switch (p) {
                 case "id":
                     if (orders.getId() != null) {
-                        Orders order = selectOrdersById(orders.getId());
+                        OrdersResl order = selectOrdersById(orders.getId());
                         if (order != null) {
                             ordersList.add(order);
                         }
@@ -59,7 +66,7 @@ public class OrdersDaoImpl implements OrdersDao {
                     break;
                 case "orderNum":
                     if (StringUtils.isNotEmpty(orders.getOrderNum())) {
-                        Orders order = selectOrdersByOrderNum(orders.getOrderNum());
+                        OrdersResl order = selectOrdersByOrderNum(orders.getOrderNum());
                         if (order != null) {
                             ordersList.add(order);
                         }
@@ -67,7 +74,7 @@ public class OrdersDaoImpl implements OrdersDao {
                     break;
                 case "userId":
                     if (orders.getUserId() != null) {
-                        List<Orders> userOrders = selectOrdersByUserId(orders.getUserId());
+                        List<OrdersResl> userOrders = selectOrdersByUserId(orders.getUserId());
                         if (userOrders != null && !userOrders.isEmpty()) {
                             ordersList.addAll(userOrders);
                         }
@@ -75,7 +82,7 @@ public class OrdersDaoImpl implements OrdersDao {
                     break;
                 case "orderStatus":
                     if (orders.getOrderStatus() != null) {
-                        List<Orders> statusOrders = selectOrdersByStatus(orders.getOrderStatus());
+                        List<OrdersResl> statusOrders = selectOrdersByStatus(orders.getOrderStatus());
                         if (statusOrders != null && !statusOrders.isEmpty()) {
                             ordersList.addAll(statusOrders);
                         }
@@ -83,7 +90,7 @@ public class OrdersDaoImpl implements OrdersDao {
                     break;
                 case "paymentMethod":
                     if (orders.getPaymentMethod() != null) {
-                        List<Orders> paymentOrders = selectOrdersByPaymentMethod(orders.getPaymentMethod());
+                        List<OrdersResl> paymentOrders = selectOrdersByPaymentMethod(orders.getPaymentMethod());
                         if (paymentOrders != null && !paymentOrders.isEmpty()) {
                             ordersList.addAll(paymentOrders);
                         }
@@ -95,51 +102,67 @@ public class OrdersDaoImpl implements OrdersDao {
     }
 
     @Override
-    public Orders selectOrdersById(Integer orderId) throws Exception {
-        String sql = "select id, order_num as orderNum, user_id as userId, shipping_user as shippingUser, " +
-                "address, payment_method as paymentMethod, order_money as orderMoney, " +
-                "shipping_money as shippingMoney, district_money as districtMoney, " +
-                "payment_money as paymentMoney, pay_time as payTime, receive_time as receiveTime, " +
-                "ship_time as shipTime, order_status as orderStatus, payment_transaction_id as paymentTransactionId, " +
-                "expected_delivery_time as expectedDeliveryTime, createdBy, createdTime, " +
-                "updatedBy, updatedTime, delFlag, remark from orders where id = ? and (delFlag = 0 OR delFlag IS NULL)";
-        return new ObjectUtil<Orders>().getOne(sql, Orders.class, orderId);
+    public OrdersResl selectOrdersById(Integer orderId) throws Exception {
+        String sql = "SELECT o.id, o.order_num as orderNum, o.user_id as userId, o.shipping_user as shippingUser, " +
+                "o.address, o.payment_method as paymentMethod, o.order_money as orderMoney, " +
+                "o.shipping_money as shippingMoney, o.district_money as districtMoney, " +
+                "o.payment_money as paymentMoney, o.pay_time as payTime, o.receive_time as receiveTime, " +
+                "o.ship_time as shipTime, o.order_status as orderStatus, o.payment_transaction_id as paymentTransactionId, " +
+                "o.expected_delivery_time as expectedDeliveryTime, o.createdBy, o.createdTime, " +
+                "o.updatedBy, o.updatedTime, o.delFlag, o.remark, " +
+                "u.name as userName, u.loginName as userLoginName, u.avatar as userAvatar, " +
+                "u.email as userEmail, u.phone as userPhone " +
+                "FROM orders o LEFT JOIN user_info u ON o.user_id = u.id " +
+                "WHERE o.id = ? AND (o.delFlag = 0 OR o.delFlag IS NULL)";
+        return new ObjectUtil<OrdersResl>().getOne(sql, OrdersResl.class, orderId);
     }
 
     @Override
-    public Orders selectOrdersByOrderNum(String orderNum) {
-        String sql = "select id, order_num as orderNum, user_id as userId, shipping_user as shippingUser, " +
-                "address, payment_method as paymentMethod, order_money as orderMoney, " +
-                "shipping_money as shippingMoney, district_money as districtMoney, " +
-                "payment_money as paymentMoney, pay_time as payTime, receive_time as receiveTime, " +
-                "ship_time as shipTime, order_status as orderStatus, payment_transaction_id as paymentTransactionId, " +
-                "expected_delivery_time as expectedDeliveryTime, createdBy, createdTime, " +
-                "updatedBy, updatedTime, delFlag, remark from orders where order_num = ? and delFlag = 0";
-        return new ObjectUtil<Orders>().getOne(sql, Orders.class, orderNum);
+    public OrdersResl selectOrdersByOrderNum(String orderNum) {
+        String sql = "SELECT o.id, o.order_num as orderNum, o.user_id as userId, o.shipping_user as shippingUser, " +
+                "o.address, o.payment_method as paymentMethod, o.order_money as orderMoney, " +
+                "o.shipping_money as shippingMoney, o.district_money as districtMoney, " +
+                "o.payment_money as paymentMoney, o.pay_time as payTime, o.receive_time as receiveTime, " +
+                "o.ship_time as shipTime, o.order_status as orderStatus, o.payment_transaction_id as paymentTransactionId, " +
+                "o.expected_delivery_time as expectedDeliveryTime, o.createdBy, o.createdTime, " +
+                "o.updatedBy, o.updatedTime, o.delFlag, o.remark, " +
+                "u.name as userName, u.loginName as userLoginName, u.avatar as userAvatar, " +
+                "u.email as userEmail, u.phone as userPhone " +
+                "FROM orders o LEFT JOIN user_info u ON o.user_id = u.id " +
+                "WHERE o.order_num = ? AND o.delFlag = 0";
+        return new ObjectUtil<OrdersResl>().getOne(sql, OrdersResl.class, orderNum);
     }
 
     @Override
-    public List<Orders> selectOrdersByUserId(Integer userId) {
-        String sql = "select id, order_num as orderNum, user_id as userId, shipping_user as shippingUser, " +
-                "address, payment_method as paymentMethod, order_money as orderMoney, " +
-                "shipping_money as shippingMoney, district_money as districtMoney, " +
-                "payment_money as paymentMoney, pay_time as payTime, receive_time as receiveTime, " +
-                "ship_time as shipTime, order_status as orderStatus, payment_transaction_id as paymentTransactionId, " +
-                "expected_delivery_time as expectedDeliveryTime, createdBy, createdTime, " +
-                "updatedBy, updatedTime, delFlag, remark from orders where user_id = ? and delFlag = 0 order by createdTime desc";
-        return new ObjectUtil<Orders>().getList(sql, Orders.class, userId);
+    public List<OrdersResl> selectOrdersByUserId(Integer userId) {
+        String sql = "SELECT o.id, o.order_num as orderNum, o.user_id as userId, o.shipping_user as shippingUser, " +
+                "o.address, o.payment_method as paymentMethod, o.order_money as orderMoney, " +
+                "o.shipping_money as shippingMoney, o.district_money as districtMoney, " +
+                "o.payment_money as paymentMoney, o.pay_time as payTime, o.receive_time as receiveTime, " +
+                "o.ship_time as shipTime, o.order_status as orderStatus, o.payment_transaction_id as paymentTransactionId, " +
+                "o.expected_delivery_time as expectedDeliveryTime, o.createdBy, o.createdTime, " +
+                "o.updatedBy, o.updatedTime, o.delFlag, o.remark, " +
+                "u.name as userName, u.loginName as userLoginName, u.avatar as userAvatar, " +
+                "u.email as userEmail, u.phone as userPhone " +
+                "FROM orders o LEFT JOIN user_info u ON o.user_id = u.id " +
+                "WHERE o.user_id = ? AND o.delFlag = 0 ORDER BY o.createdTime DESC";
+        return new ObjectUtil<OrdersResl>().getList(sql, OrdersResl.class, userId);
     }
 
     @Override
-    public List<Orders> selectOrdersByStatus(Integer orderStatus) {
-        String sql = "select id, order_num as orderNum, user_id as userId, shipping_user as shippingUser, " +
-                "address, payment_method as paymentMethod, order_money as orderMoney, " +
-                "shipping_money as shippingMoney, district_money as districtMoney, " +
-                "payment_money as paymentMoney, pay_time as payTime, receive_time as receiveTime, " +
-                "ship_time as shipTime, order_status as orderStatus, payment_transaction_id as paymentTransactionId, " +
-                "expected_delivery_time as expectedDeliveryTime, createdBy, createdTime, " +
-                "updatedBy, updatedTime, delFlag, remark from orders where order_status = ? and delFlag = 0 order by createdTime desc";
-        return new ObjectUtil<Orders>().getList(sql, Orders.class, orderStatus);
+    public List<OrdersResl> selectOrdersByStatus(Integer orderStatus) {
+        String sql = "SELECT o.id, o.order_num as orderNum, o.user_id as userId, o.shipping_user as shippingUser, " +
+                "o.address, o.payment_method as paymentMethod, o.order_money as orderMoney, " +
+                "o.shipping_money as shippingMoney, o.district_money as districtMoney, " +
+                "o.payment_money as paymentMoney, o.pay_time as payTime, o.receive_time as receiveTime, " +
+                "o.ship_time as shipTime, o.order_status as orderStatus, o.payment_transaction_id as paymentTransactionId, " +
+                "o.expected_delivery_time as expectedDeliveryTime, o.createdBy, o.createdTime, " +
+                "o.updatedBy, o.updatedTime, o.delFlag, o.remark, " +
+                "u.name as userName, u.loginName as userLoginName, u.avatar as userAvatar, " +
+                "u.email as userEmail, u.phone as userPhone " +
+                "FROM orders o LEFT JOIN user_info u ON o.user_id = u.id " +
+                "WHERE o.order_status = ? AND o.delFlag = 0 ORDER BY o.createdTime DESC";
+        return new ObjectUtil<OrdersResl>().getList(sql, OrdersResl.class, orderStatus);
     }
 
     /**
@@ -148,15 +171,19 @@ public class OrdersDaoImpl implements OrdersDao {
      * @param paymentMethod 支付方式
      * @return 订单列表
      */
-    private List<Orders> selectOrdersByPaymentMethod(Integer paymentMethod) {
-        String sql = "select id, order_num as orderNum, user_id as userId, shipping_user as shippingUser, " +
-                "address, payment_method as paymentMethod, order_money as orderMoney, " +
-                "shipping_money as shippingMoney, district_money as districtMoney, " +
-                "payment_money as paymentMoney, pay_time as payTime, receive_time as receiveTime, " +
-                "ship_time as shipTime, order_status as orderStatus, payment_transaction_id as paymentTransactionId, " +
-                "expected_delivery_time as expectedDeliveryTime, createdBy, createdTime, " +
-                "updatedBy, updatedTime, delFlag, remark from orders where payment_method = ? and delFlag = 0 order by createdTime desc";
-        return new ObjectUtil<Orders>().getList(sql, Orders.class, paymentMethod);
+    private List<OrdersResl> selectOrdersByPaymentMethod(Integer paymentMethod) {
+        String sql = "SELECT o.id, o.order_num as orderNum, o.user_id as userId, o.shipping_user as shippingUser, " +
+                "o.address, o.payment_method as paymentMethod, o.order_money as orderMoney, " +
+                "o.shipping_money as shippingMoney, o.district_money as districtMoney, " +
+                "o.payment_money as paymentMoney, o.pay_time as payTime, o.receive_time as receiveTime, " +
+                "o.ship_time as shipTime, o.order_status as orderStatus, o.payment_transaction_id as paymentTransactionId, " +
+                "o.expected_delivery_time as expectedDeliveryTime, o.createdBy, o.createdTime, " +
+                "o.updatedBy, o.updatedTime, o.delFlag, o.remark, " +
+                "u.name as userName, u.loginName as userLoginName, u.avatar as userAvatar, " +
+                "u.email as userEmail, u.phone as userPhone " +
+                "FROM orders o LEFT JOIN user_info u ON o.user_id = u.id " +
+                "WHERE o.payment_method = ? AND o.delFlag = 0 ORDER BY o.createdTime DESC";
+        return new ObjectUtil<OrdersResl>().getList(sql, OrdersResl.class, paymentMethod);
     }
 
     @Override
@@ -317,15 +344,19 @@ public class OrdersDaoImpl implements OrdersDao {
     }
 
     @Override
-    public List<Orders> selectOrdersByUserIdAndStatus(Integer userId, Integer orderStatus) {
-        String sql = "select id, order_num as orderNum, user_id as userId, shipping_user as shippingUser, " +
-                "address, payment_method as paymentMethod, order_money as orderMoney, " +
-                "shipping_money as shippingMoney, district_money as districtMoney, " +
-                "payment_money as paymentMoney, pay_time as payTime, receive_time as receiveTime, " +
-                "ship_time as shipTime, order_status as orderStatus, payment_transaction_id as paymentTransactionId, " +
-                "expected_delivery_time as expectedDeliveryTime, createdBy, createdTime, " +
-                "updatedBy, updatedTime, delFlag, remark from orders where user_id = ? and order_status = ? and delFlag = 0 order by createdTime desc";
-        return new ObjectUtil<Orders>().getList(sql, Orders.class, userId, orderStatus);
+    public List<OrdersResl> selectOrdersByUserIdAndStatus(Integer userId, Integer orderStatus) {
+        String sql = "SELECT o.id, o.order_num as orderNum, o.user_id as userId, o.shipping_user as shippingUser, " +
+                "o.address, o.payment_method as paymentMethod, o.order_money as orderMoney, " +
+                "o.shipping_money as shippingMoney, o.district_money as districtMoney, " +
+                "o.payment_money as paymentMoney, o.pay_time as payTime, o.receive_time as receiveTime, " +
+                "o.ship_time as shipTime, o.order_status as orderStatus, o.payment_transaction_id as paymentTransactionId, " +
+                "o.expected_delivery_time as expectedDeliveryTime, o.createdBy, o.createdTime, " +
+                "o.updatedBy, o.updatedTime, o.delFlag, o.remark, " +
+                "u.name as userName, u.loginName as userLoginName, u.avatar as userAvatar, " +
+                "u.email as userEmail, u.phone as userPhone " +
+                "FROM orders o LEFT JOIN user_info u ON o.user_id = u.id " +
+                "WHERE o.user_id = ? AND o.order_status = ? AND o.delFlag = 0 ORDER BY o.createdTime DESC";
+        return new ObjectUtil<OrdersResl>().getList(sql, OrdersResl.class, userId, orderStatus);
     }
 
     @Override
