@@ -8,8 +8,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>欢迎光临——EmarketMall购物商城</title>
-    <meta name="description" content="EmarketMall购物商城 - 您的购物首选">
+    <title>向日葵水果 - 新鲜水果直达您家</title>
+    <meta name="description" content="向日葵水果 - 新鲜优质水果，健康生活从这里开始">
     
     <!-- 引入通用头部 -->
     <%@ include file="../common/header.jsp" %>
@@ -171,29 +171,29 @@
             </ol>
             <div class="carousel-inner">
                 <div class="item active">
-                    <div style="height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+                    <div style="height: 400px; background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
                         <div class="text-center">
-                            <i class="fa fa-gift" style="font-size: 80px; margin-bottom: 20px;"></i>
-                            <h2>春季大促销</h2>
-                            <p style="font-size: 24px;">全场商品5折起</p>
+                            <i class="fa fa-sun-o" style="font-size: 80px; margin-bottom: 20px;"></i>
+                            <h2>新鲜水果</h2>
+                            <p style="font-size: 24px;">每日新鲜直达</p>
                         </div>
                     </div>
                 </div>
                 <div class="item">
-                    <div style="height: 400px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+                    <div style="height: 400px; background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
                         <div class="text-center">
-                            <i class="fa fa-star" style="font-size: 80px; margin-bottom: 20px;"></i>
-                            <h2>新品上市</h2>
-                            <p style="font-size: 24px;">最新潮流商品</p>
+                            <i class="fa fa-leaf" style="font-size: 80px; margin-bottom: 20px;"></i>
+                            <h2>有机认证</h2>
+                            <p style="font-size: 24px;">绿色健康保证</p>
                         </div>
                     </div>
                 </div>
                 <div class="item">
-                    <div style="height: 400px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+                    <div style="height: 400px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
                         <div class="text-center">
                             <i class="fa fa-truck" style="font-size: 80px; margin-bottom: 20px;"></i>
-                            <h2>免费配送</h2>
-                            <p style="font-size: 24px;">满99元包邮</p>
+                            <h2>当日配送</h2>
+                            <p style="font-size: 24px;">新鲜直达您家</p>
                         </div>
                     </div>
                 </div>
@@ -210,54 +210,54 @@
     <!-- 商品分类 -->
     <div class="container">
         <div class="category-section">
-            <h2 class="section-title">商品分类</h2>
+            <h2 class="section-title">水果分类</h2>
             <div class="row">
                 <div class="col-md-2 col-sm-4 col-xs-6">
-                    <div class="category-item" data-category="electronics">
+                    <div class="category-item" data-category="citrus" onclick="location.href='${ctx}/web/category.jsp?type=citrus'">
                         <div class="category-icon">
-                            <i class="fa fa-laptop"></i>
+                            <i class="fa fa-circle-o" style="color: #f39c12;"></i>
                         </div>
-                        <h4>数码电器</h4>
+                        <h4>柑橘类</h4>
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-4 col-xs-6">
-                    <div class="category-item" data-category="clothing">
+                    <div class="category-item" data-category="berry" onclick="location.href='${ctx}/web/category.jsp?type=berry'">
                         <div class="category-icon">
-                            <i class="fa fa-female"></i>
+                            <i class="fa fa-circle" style="color: #8e44ad;"></i>
                         </div>
-                        <h4>服装鞋帽</h4>
+                        <h4>浆果类</h4>
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-4 col-xs-6">
-                    <div class="category-item" data-category="home">
+                    <div class="category-item" data-category="tropical" onclick="location.href='${ctx}/web/category.jsp?type=tropical'">
                         <div class="category-icon">
-                            <i class="fa fa-home"></i>
+                            <i class="fa fa-sun-o" style="color: #e67e22;"></i>
                         </div>
-                        <h4>家居用品</h4>
+                        <h4>热带水果</h4>
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-4 col-xs-6">
-                    <div class="category-item" data-category="sports">
+                    <div class="category-item" data-category="stone" onclick="location.href='${ctx}/web/category.jsp?type=stone'">
                         <div class="category-icon">
-                            <i class="fa fa-futbol-o"></i>
+                            <i class="fa fa-heart" style="color: #e74c3c;"></i>
                         </div>
-                        <h4>运动户外</h4>
+                        <h4>核果类</h4>
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-4 col-xs-6">
-                    <div class="category-item" data-category="books">
+                    <div class="category-item" data-category="melon" onclick="location.href='${ctx}/web/category.jsp?type=melon'">
                         <div class="category-icon">
-                            <i class="fa fa-book"></i>
+                            <i class="fa fa-circle" style="color: #27ae60;"></i>
                         </div>
-                        <h4>图书文具</h4>
+                        <h4>瓜果类</h4>
                     </div>
                 </div>
                 <div class="col-md-2 col-sm-4 col-xs-6">
-                    <div class="category-item" data-category="food">
+                    <div class="category-item" data-category="gift" onclick="location.href='${ctx}/web/gift.jsp'">
                         <div class="category-icon">
-                            <i class="fa fa-cutlery"></i>
+                            <i class="fa fa-gift" style="color: #9b59b6;"></i>
                         </div>
-                        <h4>食品饮料</h4>
+                        <h4>礼品装</h4>
                     </div>
                 </div>
             </div>
@@ -267,15 +267,15 @@
     <!-- 热门商品 -->
     <div class="container">
         <div class="product-section">
-            <h2 class="section-title">热门商品</h2>
+            <h2 class="section-title">热门水果</h2>
             <div class="row" id="hotProducts">
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-laptop"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #f39c12, #e67e22); color: white;">
+                            <i class="fa fa-circle-o" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">联想笔记本电脑</div>
-                        <div class="product-price">¥4999.00</div>
+                        <div class="product-name">新鲜橙子</div>
+                        <div class="product-price">¥12.80/斤</div>
                         <button class="btn btn-buy" onclick="addToCart(1)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
@@ -283,11 +283,11 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-mobile"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white;">
+                            <i class="fa fa-heart" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">华为智能手机</div>
-                        <div class="product-price">¥2999.00</div>
+                        <div class="product-name">红富士苹果</div>
+                        <div class="product-price">¥15.60/斤</div>
                         <button class="btn btn-buy" onclick="addToCart(2)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
@@ -295,11 +295,11 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-headphones"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #f1c40f, #f39c12); color: white;">
+                            <i class="fa fa-star" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">无线蓝牙耳机</div>
-                        <div class="product-price">¥299.00</div>
+                        <div class="product-name">香甜香蕉</div>
+                        <div class="product-price">¥8.90/斤</div>
                         <button class="btn btn-buy" onclick="addToCart(3)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
@@ -307,11 +307,11 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-camera"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #8e44ad, #9b59b6); color: white;">
+                            <i class="fa fa-circle" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">数码相机</div>
-                        <div class="product-price">¥1999.00</div>
+                        <div class="product-name">新鲜葡萄</div>
+                        <div class="product-price">¥18.80/斤</div>
                         <button class="btn btn-buy" onclick="addToCart(4)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
@@ -320,7 +320,7 @@
             </div>
             <div class="text-center" style="margin-top: 30px;">
                 <button class="btn btn-primary btn-lg" onclick="viewAllProducts()">
-                    查看更多商品 <i class="fa fa-arrow-right"></i>
+                    查看更多水果 <i class="fa fa-arrow-right"></i>
                 </button>
             </div>
         </div>
@@ -329,15 +329,15 @@
     <!-- 推荐商品 -->
     <div class="container">
         <div class="product-section">
-            <h2 class="section-title">推荐商品</h2>
+            <h2 class="section-title">时令推荐</h2>
             <div class="row" id="recommendProducts">
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-tshirt"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #e67e22, #d35400); color: white;">
+                            <i class="fa fa-sun-o" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">时尚T恤</div>
-                        <div class="product-price">¥99.00</div>
+                        <div class="product-name">芒果</div>
+                        <div class="product-price">¥22.80/斤</div>
                         <button class="btn btn-buy" onclick="addToCart(5)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
@@ -345,11 +345,11 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-coffee"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #27ae60, #2ecc71); color: white;">
+                            <i class="fa fa-circle" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">咖啡机</div>
-                        <div class="product-price">¥599.00</div>
+                        <div class="product-name">猕猴桃</div>
+                        <div class="product-price">¥16.80/斤</div>
                         <button class="btn btn-buy" onclick="addToCart(6)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
@@ -357,11 +357,11 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-gamepad"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white;">
+                            <i class="fa fa-circle" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">游戏手柄</div>
-                        <div class="product-price">¥199.00</div>
+                        <div class="product-name">草莓</div>
+                        <div class="product-price">¥28.80/盒</div>
                         <button class="btn btn-buy" onclick="addToCart(7)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
@@ -369,11 +369,11 @@
                 </div>
                 <div class="col-md-3 col-sm-6">
                     <div class="product-card">
-                        <div class="product-img">
-                            <i class="fa fa-bicycle"></i>
+                        <div class="product-img" style="background: linear-gradient(45deg, #f39c12, #e67e22); color: white;">
+                            <i class="fa fa-circle" style="font-size: 60px;"></i>
                         </div>
-                        <div class="product-name">山地自行车</div>
-                        <div class="product-price">¥1299.00</div>
+                        <div class="product-name">柠檬</div>
+                        <div class="product-price">¥9.80/斤</div>
                         <button class="btn btn-buy" onclick="addToCart(8)">
                             <i class="fa fa-cart-plus"></i> 加入购物车
                         </button>
