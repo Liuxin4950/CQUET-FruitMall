@@ -23,6 +23,7 @@
         <!-- Main Menu -->
         <div class="side-menu-container">
             <ul class="nav navbar-nav">
+                <li><a href="${ctx}/admin/index.jsp"><span class="glyphicon glyphicon-user"></span> 数据大屏</a></li>
                 <li><a href="${ctx}/admin/user/user.jsp"><span class="glyphicon glyphicon-user"></span> 用户管理</a></li>
                 <li><a href="${ctx}/admin/product/product.jsp"><span class="glyphicon glyphicon-gift"></span> 商品管理</a></li>
                 <li><a href="${ctx}/admin/orders/orders.jsp"><span class="glyphicon glyphicon-align-left"></span> 订单管理</a></li>

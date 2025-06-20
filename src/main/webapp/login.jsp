@@ -96,6 +96,7 @@
             },
             dataType: "json",
             success: function (ret) {
+                console.log("登录返回结果:", ret);
                 if (ret.code == 0) {
                     // 根据用户类型跳转到不同页面
                     if (ret.data && ret.data.userType === 'admin') {
