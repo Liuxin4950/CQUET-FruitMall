@@ -13,7 +13,7 @@ build/
 .mtj.tmp/
 
 # Package Files
-*.jar
+#*.jar
 *.war
 *.nar
 *.ear
@@ -100,8 +100,8 @@ Thumbs.db
 *.sqlite3
 
 # Application specific
-libs/
-!libs/README.md
+#libs/
+#!libs/README.md
 
 # Configuration files with sensitive data
 *.properties
