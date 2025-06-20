@@ -185,6 +185,45 @@
             background: #2980b9;
             color: white;
         }
+        
+        .fruit-actions .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* 分类区域显示控制 */
+        .category-section {
+            display: none;
+        }
+        
+        .category-section.active {
+            display: block;
+        }
+        
+        /* 特性标签样式 */
+        .feature-tag {
+            display: inline-block;
+            background: #e8f5e8;
+            color: #27ae60;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-right: 4px;
+            margin-bottom: 2px;
+        }
+        
+        /* 热销标签 */
+        .fruit-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+        }
         .category-intro {
             text-align: center;
             margin-bottom: 40px;
@@ -585,175 +624,12 @@
     <%@ include file="../common/footer.jsp" %>
     
     <script>
-        function showCategory(category) {
-            // 隐藏所有分类
-            const sections = document.querySelectorAll('.category-section');
-            sections.forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // 显示选中的分类
-            document.getElementById(category).classList.add('active');
-            
-            // 更新导航标签状态
-            const tabs = document.querySelectorAll('.category-tab');
-            tabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // 找到对应的标签并激活
-            const categoryMap = {
-                'citrus': '🍊 柑橘类',
-                'berry': '🍓 浆果类',
-                'tropical': '🥭 热带水果',
-                'stone': '🍑 核果类',
-                'melon': '🍉 瓜果类',
-                'all': '🍎 全部分类'
-            };
-            
-            tabs.forEach(tab => {
-                if (tab.textContent.trim() === categoryMap[category]) {
-                    tab.classList.add('active');
-                }
-            });
-            
-            // 滚动到顶部
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
+        // 全局配置变量
+        window.contextPath = '${ctx}';
+        window.isUserLoggedIn = <%= session.getAttribute("loginName") != null %>;
     </script>
-</body>
-</html>
-                        <i class="fa fa-laptop"></i>
-                    </div>
-                    <h3>电子产品</h3>
-                    <p>手机、电脑、平板、数码相机、智能设备等</p>
-                    <a href="${ctx}/web/products.jsp?category=electronics" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-female"></i>
-                    </div>
-                    <h3>服装鞋帽</h3>
-                    <p>男装、女装、童装、鞋类、配饰等</p>
-                    <a href="${ctx}/web/products.jsp?category=clothing" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-home"></i>
-                    </div>
-                    <h3>家居生活</h3>
-                    <p>家具、家电、厨具、装饰用品等</p>
-                    <a href="${ctx}/web/products.jsp?category=home" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-futbol-o"></i>
-                    </div>
-                    <h3>运动户外</h3>
-                    <p>运动装备、健身器材、户外用品等</p>
-                    <a href="${ctx}/web/products.jsp?category=sports" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-book"></i>
-                    </div>
-                    <h3>图书文具</h3>
-                    <p>图书、文具用品、办公用品等</p>
-                    <a href="${ctx}/web/products.jsp?category=books" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-cutlery"></i>
-                    </div>
-                    <h3>食品饮料</h3>
-                    <p>零食、饮料、生鲜食品、保健品等</p>
-                    <a href="${ctx}/web/products.jsp?category=food" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-car"></i>
-                    </div>
-                    <h3>汽车用品</h3>
-                    <p>汽车配件、装饰用品、保养用品等</p>
-                    <a href="${ctx}/web/products.jsp?category=automotive" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-heart"></i>
-                    </div>
-                    <h3>美妆护肤</h3>
-                    <p>化妆品、护肤品、个人护理用品等</p>
-                    <a href="${ctx}/web/products.jsp?category=beauty" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-            
-            <div class="col-md-4 col-sm-6">
-                <div class="category-card">
-                    <div class="icon">
-                        <i class="fa fa-gamepad"></i>
-                    </div>
-                    <h3>游戏娱乐</h3>
-                    <p>游戏设备、玩具、娱乐用品等</p>
-                    <a href="${ctx}/web/products.jsp?category=games" class="btn">
-                        <i class="fa fa-arrow-right"></i> 查看商品
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
     
-    <!-- 引入通用页脚 -->
-    <%@ include file="../common/footer.jsp" %>
-    
-    <script>
-        $(document).ready(function() {
-            // 分类卡片动画效果
-            $('.category-card').each(function(index) {
-                $(this).delay(index * 100).animate({
-                    opacity: 1
-                }, 500);
-            });
-        });
-    </script>
+    <!-- 引入分类页面JS模块 -->
+    <script src="${ctx}/web/js/category.js"></script>
 </body>
 </html>

@@ -171,35 +171,59 @@
         </div>
     </div>
     
+    <!-- 搜索区域 -->
+    <div class="container" style="margin-top: 20px;">
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="input-group input-group-lg">
+                    <input type="text" class="form-control" id="searchInput" placeholder="搜索商品名称...">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button" id="searchBtn">
+                            <i class="fa fa-search"></i> 搜索
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- 筛选区域 -->
     <div class="filter-section">
         <div class="container">
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="filter-item">
                         <label>分类：</label><br>
-                        <button class="filter-btn active" data-category="all">全部</button>
-                        <button class="filter-btn" data-category="electronics">电子产品</button>
-                        <button class="filter-btn" data-category="clothing">服装鞋帽</button>
-                        <button class="filter-btn" data-category="home">家居生活</button>
+                        <button class="filter-btn active" data-category="">全部</button>
+                        <button class="filter-btn" data-category="1">水果</button>
+                        <button class="filter-btn" data-category="2">蔬菜</button>
+                        <button class="filter-btn" data-category="3">坚果</button>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <div class="filter-item">
                         <label>价格：</label><br>
-                        <button class="filter-btn active" data-price="all">全部</button>
-                        <button class="filter-btn" data-price="0-100">¥0-100</button>
-                        <button class="filter-btn" data-price="100-500">¥100-500</button>
-                        <button class="filter-btn" data-price="500+">¥500以上</button>
+                        <button class="filter-btn active" data-price="">全部</button>
+                        <button class="filter-btn" data-price="low">¥50以下</button>
+                        <button class="filter-btn" data-price="medium">¥50-200</button>
+                        <button class="filter-btn" data-price="high">¥200以上</button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="filter-item">
+                        <label>特性：</label><br>
+                        <button class="filter-btn" data-organic="true">有机</button>
+                        <button class="filter-btn" data-seasonal="true">时令</button>
+                        <button class="filter-btn" data-fresh="true">新鲜</button>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="filter-item">
-                        <label>品牌：</label><br>
-                        <button class="filter-btn active" data-brand="all">全部</button>
-                        <button class="filter-btn" data-brand="apple">Apple</button>
-                        <button class="filter-btn" data-brand="samsung">Samsung</button>
-                        <button class="filter-btn" data-brand="nike">Nike</button>
+                        <label>产地：</label><br>
+                        <button class="filter-btn" data-origin="山东">山东</button>
+                        <button class="filter-btn" data-origin="新疆">新疆</button>
+                        <button class="filter-btn" data-origin="海南">海南</button>
+                        <button class="filter-btn" data-origin="进口">进口</button>
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -244,49 +268,109 @@
     <%@ include file="../common/footer.jsp" %>
     
     <script>
-        // 模拟商品数据
-        var products = [
-            {id: 1, name: 'iPhone 14 Pro', price: 7999, category: 'electronics', brand: 'apple', rating: 5, image: 'fa-mobile'},
-            {id: 2, name: 'MacBook Pro', price: 12999, category: 'electronics', brand: 'apple', rating: 5, image: 'fa-laptop'},
-            {id: 3, name: 'Samsung Galaxy S23', price: 5999, category: 'electronics', brand: 'samsung', rating: 4, image: 'fa-mobile'},
-            {id: 4, name: 'Nike Air Max', price: 899, category: 'clothing', brand: 'nike', rating: 4, image: 'fa-shopping-bag'},
-            {id: 5, name: '智能电视', price: 3999, category: 'home', brand: 'other', rating: 4, image: 'fa-tv'},
-            {id: 6, name: '咖啡机', price: 599, category: 'home', brand: 'other', rating: 4, image: 'fa-coffee'},
-            {id: 7, name: '游戏手柄', price: 199, category: 'electronics', brand: 'other', rating: 4, image: 'fa-gamepad'},
-            {id: 8, name: '运动鞋', price: 699, category: 'clothing', brand: 'nike', rating: 4, image: 'fa-shopping-bag'},
-            {id: 9, name: 'iPad Pro', price: 6999, category: 'electronics', brand: 'apple', rating: 5, image: 'fa-tablet'},
-            {id: 10, name: '智能手表', price: 2999, category: 'electronics', brand: 'apple', rating: 4, image: 'fa-clock-o'},
-            {id: 11, name: '蓝牙耳机', price: 299, category: 'electronics', brand: 'other', rating: 4, image: 'fa-headphones'},
-            {id: 12, name: '办公椅', price: 1299, category: 'home', brand: 'other', rating: 4, image: 'fa-home'}
-        ];
+        // 全局变量
+        var currentProducts = [];
+        var currentPage = 1;
+        var pageSize = 12;
+        var totalPages = 1;
+        var currentFilters = {
+            categoryId: null,
+            minPrice: null,
+            maxPrice: null,
+            isOrganic: null,
+            isSeasonal: null,
+            originPlace: null,
+            sortField: null,
+            sortOrder: null,
+            productName: null
+        };
         
-        var currentProducts = products;
+        // API调用函数
+        function callProductAPI(opt, params, callback) {
+            var url = '${ctx}/web/product?opt=' + opt;
+            
+            // 添加参数到URL
+            if (params) {
+                for (var key in params) {
+                    if (params[key] !== null && params[key] !== undefined && params[key] !== '') {
+                        url += '&' + key + '=' + encodeURIComponent(params[key]);
+                    }
+                }
+            }
+            
+            $.ajax({
+                url: url,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.code === 0) {
+                        callback(response.data);
+                    } else {
+                        console.error('API调用失败:', response.msg);
+                        alert('数据加载失败: ' + response.msg);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX请求失败:', error);
+                    alert('网络请求失败，请稍后重试');
+                }
+            });
+        }
         
         // 渲染商品列表
-        function renderProducts(productList) {
+        function renderProducts(data) {
             var container = $('#productsContainer');
             container.empty();
             
+            var productList = [];
+            if (data && data.rows) {
+                // 分页数据格式
+                productList = data.rows;
+                totalPages = Math.ceil(data.total / pageSize);
+                updatePagination();
+            } else if (Array.isArray(data)) {
+                // 直接数组格式
+                productList = data;
+            }
+            
+            if (productList.length === 0) {
+                container.html('<div class="col-12 text-center"><p class="text-muted">暂无商品数据</p></div>');
+                return;
+            }
+            
             productList.forEach(function(product) {
                 var stars = '';
+                var rating = product.rating || 0;
                 for (var i = 0; i < 5; i++) {
-                    stars += i < product.rating ? '<i class="fa fa-star"></i>' : '<i class="fa fa-star-o"></i>';
+                    stars += i < rating ? '<i class="fa fa-star"></i>' : '<i class="fa fa-star-o"></i>';
                 }
+                
+                // 根据商品名称生成图标
+                var icon = getProductIcon(product.productName || product.name);
+                var price = product.price || product.salePrice || 0;
+                var productName = product.productName || product.name || '未知商品';
+                var productId = product.productId || product.id;
                 
                 var productHtml = `
                     <div class="col-md-3 col-sm-6">
                         <div class="product-item">
                             <div class="product-image">
-                                <i class="fa ${product.image}"></i>
+                                <i class="fa ${icon}"></i>
                             </div>
-                            <div class="product-title">${product.name}</div>
-                            <div class="product-rating">${stars}</div>
-                            <div class="product-price">¥${product.price.toFixed(2)}</div>
+                            <div class="product-title">${productName}</div>
+                            <div class="product-rating">${stars} (${rating})</div>
+                            <div class="product-price">¥${parseFloat(price).toFixed(2)}</div>
+                            ${product.isOrganic ? '<span class="badge badge-success">有机</span>' : ''}
+                            ${product.isSeasonal ? '<span class="badge badge-warning">时令</span>' : ''}
+                            <div class="product-meta">
+                                <small class="text-muted">产地: ${product.originPlace || '未知'}</small><br>
+                                <small class="text-muted">销量: ${product.salesCount || 0}</small>
+                            </div>
                             <div class="product-actions">
-                                <button class="btn btn-detail" onclick="viewProduct(${product.id})">
+                                <button class="btn btn-detail" onclick="viewProduct(${productId})">
                                     <i class="fa fa-eye"></i> 详情
                                 </button>
-                                <button class="btn btn-cart" onclick="addToCart(${product.id})">
+                                <button class="btn btn-cart" onclick="addToCart(${productId})">
                                     <i class="fa fa-cart-plus"></i> 购买
                                 </button>
                             </div>
@@ -297,55 +381,157 @@
             });
         }
         
+        // 根据商品名称获取图标
+        function getProductIcon(productName) {
+            if (!productName) return 'fa-cube';
+            
+            var name = productName.toLowerCase();
+            if (name.includes('苹果') || name.includes('apple')) return 'fa-apple';
+            if (name.includes('香蕉') || name.includes('banana')) return 'fa-leaf';
+            if (name.includes('橙') || name.includes('orange')) return 'fa-circle';
+            if (name.includes('葡萄') || name.includes('grape')) return 'fa-circle-o';
+            if (name.includes('草莓') || name.includes('strawberry')) return 'fa-heart';
+            if (name.includes('西瓜') || name.includes('watermelon')) return 'fa-circle';
+            if (name.includes('桃') || name.includes('peach')) return 'fa-heart-o';
+            if (name.includes('梨') || name.includes('pear')) return 'fa-leaf';
+            return 'fa-cube';
+        }
+        
+        // 加载商品列表
+        function loadProducts() {
+            var params = {
+                pageNum: currentPage,
+                pageSize: pageSize
+            };
+            
+            // 添加筛选条件
+            Object.assign(params, currentFilters);
+            
+            callProductAPI('list', params, function(data) {
+                currentProducts = data;
+                renderProducts(data);
+            });
+        }
+        
         // 筛选商品
         function filterProducts() {
-            var category = $('.filter-btn[data-category].active').data('category');
-            var price = $('.filter-btn[data-price].active').data('price');
-            var brand = $('.filter-btn[data-brand].active').data('brand');
+            // 重置到第一页
+            currentPage = 1;
             
-            currentProducts = products.filter(function(product) {
-                var categoryMatch = category === 'all' || product.category === category;
-                var brandMatch = brand === 'all' || product.brand === brand;
-                var priceMatch = true;
-                
-                if (price !== 'all') {
-                    if (price === '0-100') {
-                        priceMatch = product.price <= 100;
-                    } else if (price === '100-500') {
-                        priceMatch = product.price > 100 && product.price <= 500;
-                    } else if (price === '500+') {
-                        priceMatch = product.price > 500;
-                    }
+            // 获取当前筛选条件
+            var activeCategory = $('.filter-btn[data-category].active').data('category');
+            var activePrice = $('.filter-btn[data-price].active').data('price');
+            
+            // 获取特性筛选（可多选）
+            var organicBtn = $('.filter-btn[data-organic].active');
+            var seasonalBtn = $('.filter-btn[data-seasonal].active');
+            var freshBtn = $('.filter-btn[data-fresh].active');
+            
+            // 获取产地筛选
+            var activeOrigin = $('.filter-btn[data-origin].active').data('origin');
+            
+            // 更新筛选条件
+            currentFilters.oneCategoryId = activeCategory || null;
+            
+            // 价格筛选
+            if (activePrice) {
+                switch(activePrice) {
+                    case 'low':
+                        currentFilters.minPrice = null;
+                        currentFilters.maxPrice = 50;
+                        break;
+                    case 'medium':
+                        currentFilters.minPrice = 50;
+                        currentFilters.maxPrice = 200;
+                        break;
+                    case 'high':
+                        currentFilters.minPrice = 200;
+                        currentFilters.maxPrice = null;
+                        break;
                 }
-                
-                return categoryMatch && brandMatch && priceMatch;
-            });
+            } else {
+                currentFilters.minPrice = null;
+                currentFilters.maxPrice = null;
+            }
             
-            renderProducts(currentProducts);
+            // 特性筛选
+            currentFilters.isOrganic = organicBtn.length > 0 ? true : null;
+            currentFilters.isSeasonal = seasonalBtn.length > 0 ? true : null;
+            
+            // 产地筛选
+            currentFilters.originPlace = activeOrigin || null;
+            
+            loadProducts();
         }
         
         // 排序商品
         function sortProducts(sortType) {
-            switch (sortType) {
+            currentPage = 1;
+            
+            switch(sortType) {
                 case 'price-asc':
-                    currentProducts.sort((a, b) => a.price - b.price);
+                    currentFilters.sortField = 'price';
+                    currentFilters.sortOrder = 'asc';
                     break;
                 case 'price-desc':
-                    currentProducts.sort((a, b) => b.price - a.price);
+                    currentFilters.sortField = 'price';
+                    currentFilters.sortOrder = 'desc';
                     break;
                 case 'rating':
-                    currentProducts.sort((a, b) => b.rating - a.rating);
+                    currentFilters.sortField = 'rating';
+                    currentFilters.sortOrder = 'desc';
                     break;
                 case 'sales':
-                    // 模拟销量排序
-                    currentProducts.sort((a, b) => b.id - a.id);
+                    currentFilters.sortField = 'salesCount';
+                    currentFilters.sortOrder = 'desc';
                     break;
                 default:
-                    currentProducts = products.slice();
-                    filterProducts();
-                    return;
+                    currentFilters.sortField = null;
+                    currentFilters.sortOrder = null;
             }
-            renderProducts(currentProducts);
+            
+            loadProducts();
+        }
+        
+        // 更新分页
+        function updatePagination() {
+            var paginationHtml = '';
+            
+            // 上一页
+            if (currentPage > 1) {
+                paginationHtml += '<li><a href="#" onclick="goToPage(' + (currentPage - 1) + ')"><i class="fa fa-angle-left"></i></a></li>';
+            } else {
+                paginationHtml += '<li class="disabled"><a href="#"><i class="fa fa-angle-left"></i></a></li>';
+            }
+            
+            // 页码
+            var startPage = Math.max(1, currentPage - 2);
+            var endPage = Math.min(totalPages, currentPage + 2);
+            
+            for (var i = startPage; i <= endPage; i++) {
+                if (i === currentPage) {
+                    paginationHtml += '<li class="active"><a href="#">' + i + '</a></li>';
+                } else {
+                    paginationHtml += '<li><a href="#" onclick="goToPage(' + i + ')">' + i + '</a></li>';
+                }
+            }
+            
+            // 下一页
+            if (currentPage < totalPages) {
+                paginationHtml += '<li><a href="#" onclick="goToPage(' + (currentPage + 1) + ')"><i class="fa fa-angle-right"></i></a></li>';
+            } else {
+                paginationHtml += '<li class="disabled"><a href="#"><i class="fa fa-angle-right"></i></a></li>';
+            }
+            
+            $('.pagination').html(paginationHtml);
+        }
+        
+        // 跳转到指定页
+        function goToPage(page) {
+            if (page >= 1 && page <= totalPages && page !== currentPage) {
+                currentPage = page;
+                loadProducts();
+            }
         }
         
         // 查看商品详情
@@ -369,17 +555,46 @@
         }
         
         $(document).ready(function() {
+            // 获取URL参数
+            var urlParams = new URLSearchParams(window.location.search);
+            var categoryId = urlParams.get('categoryId');
+            var keyword = urlParams.get('keyword');
+            
+            // 设置初始筛选条件
+            if (categoryId) {
+                currentFilters.oneCategoryId = parseInt(categoryId);
+                $('.filter-btn[data-category="' + categoryId + '"]').addClass('active');
+            }
+            if (keyword) {
+                currentFilters.productName = keyword;
+            }
+            
             // 初始化商品列表
-            renderProducts(products);
+            loadProducts();
             
             // 筛选按钮事件
             $('.filter-btn').click(function() {
-                var group = $(this).data('category') ? 'category' : 
-                           $(this).data('price') ? 'price' : 'brand';
+                const $this = $(this);
                 
-                $(this).siblings(`[data-${group}]`).removeClass('active');
-                $(this).addClass('active');
+                // 判断筛选类型
+                if (this.dataset.category !== undefined) {
+                    // 分类筛选 - 单选
+                    $('.filter-btn[data-category]').removeClass('active');
+                    $this.addClass('active');
+                } else if (this.dataset.price !== undefined) {
+                    // 价格筛选 - 单选
+                    $('.filter-btn[data-price]').removeClass('active');
+                    $this.addClass('active');
+                } else if (this.dataset.origin !== undefined) {
+                    // 产地筛选 - 单选
+                    $('.filter-btn[data-origin]').removeClass('active');
+                    $this.addClass('active');
+                } else if (this.dataset.organic !== undefined || this.dataset.seasonal !== undefined || this.dataset.fresh !== undefined) {
+                    // 特性筛选 - 可多选，点击切换状态
+                    $this.toggleClass('active');
+                }
                 
+                // 执行筛选
                 filterProducts();
             });
             
@@ -388,11 +603,26 @@
                 sortProducts($(this).val());
             });
             
-            // 商品项动画
-            $('.product-item').each(function(index) {
-                $(this).delay(index * 50).animate({
-                    opacity: 1
-                }, 300);
+            // 搜索功能
+            $('#searchInput').on('keypress', function(e) {
+                if (e.which === 13) {
+                    var keyword = $(this).val().trim();
+                    if (keyword) {
+                        currentFilters.productName = keyword;
+                        currentPage = 1;
+                        loadProducts();
+                    }
+                }
+            });
+            
+            // 搜索按钮
+            $('#searchBtn').click(function() {
+                var keyword = $('#searchInput').val().trim();
+                if (keyword) {
+                    currentFilters.productName = keyword;
+                    currentPage = 1;
+                    loadProducts();
+                }
             });
         });
     </script>

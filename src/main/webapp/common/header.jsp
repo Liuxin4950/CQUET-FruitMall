@@ -1,17 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<% pageContext.setAttribute("ctx", request.getContextPath());%>
-
-<!-- Meta标签 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="renderer" content="webkit">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<link rel="shortcut icon" href="${ctx}/static/favicon.ico"/>
-
-<!-- CSS框架 -->
-<link href="${ctx}/static/css/bootstrap.min.css" rel="stylesheet"/>
-<link href="${ctx}/static/css/font-awesome.min.css" rel="stylesheet"/>
-<link href="${ctx}/static/css/style.css" rel="stylesheet"/>
+<!-- 引入统一资源管理 -->
+<%@ include file="resources.jsp" %>
 
 <!-- 通用样式 -->
 <style>

@@ -3,7 +3,10 @@ package org.example.emarketmall.service.impl;
 import org.example.emarketmall.dao.OrderCartDao;
 import org.example.emarketmall.dao.impl.OrderCartDaoImpl;
 import org.example.emarketmall.entity.OrderCart;
+import org.example.emarketmall.entity.ProductInfo;
 import org.example.emarketmall.service.OrderCartService;
+import org.example.emarketmall.service.ProductInfoService;
+import org.example.emarketmall.service.impl.ProductInfoServiceImpl;
 import org.example.emarketmall.utils.DateUtils;
 import org.example.emarketmall.utils.StringUtils;
 
@@ -16,9 +19,11 @@ import java.util.List;
  */
 public class OrderCartServiceImpl implements OrderCartService {
     private OrderCartDao orderCartDao;
+    private ProductInfoService productInfoService;
 
     public OrderCartServiceImpl() {
         orderCartDao = new OrderCartDaoImpl();
+        productInfoService = new ProductInfoServiceImpl();
     }
 
     @Override
@@ -133,7 +138,7 @@ public class OrderCartServiceImpl implements OrderCartService {
     }
 
     @Override
-    public boolean addToCart(Integer userId, String productId, Integer amount) {
+    public boolean addToCart(Integer userId, String productId, Integer amount, java.math.BigDecimal price, String productName, String productPic) {
         try {
             // 检查购物车中是否已存在该商品
             OrderCart existingCart = orderCartDao.selectOrderCartByUserIdAndProductId(userId, productId);
@@ -149,6 +154,9 @@ public class OrderCartServiceImpl implements OrderCartService {
                 orderCart.setUserId(userId);
                 orderCart.setProductId(productId);
                 orderCart.setAmount(amount);
+                orderCart.setPrice(price);
+                orderCart.setProductName(productName);
+                orderCart.setProductPic(productPic);
                 orderCart.setIsSelected(true); // 默认选中
                 orderCart.setCreatedBy("system");
                 orderCart.setCreatedTime(DateUtils.getTime());
@@ -186,5 +194,24 @@ public class OrderCartServiceImpl implements OrderCartService {
             e.printStackTrace();
         }
         return false;
+    }
+
+    @Override
+    public boolean addToCart(Integer userId, String productId, Integer amount) {
+        try {
+            // 通过商品ID查询商品信息
+            ProductInfo productInfo = productInfoService.selectProductInfoById(Integer.parseInt(productId));
+            if (productInfo == null) {
+                System.err.println("商品不存在: " + productId);
+                return false;
+            }
+            
+            // 调用完整版本的addToCart方法
+            return addToCart(userId, productId, amount, productInfo.getPrice(), 
+                           productInfo.getProductName(), productInfo.getImageUrl());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

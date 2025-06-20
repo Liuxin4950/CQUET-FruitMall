@@ -2,22 +2,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>登录EmarketMall系统</title>
+    <title>注册EmarketMall系统</title>
     <meta name="description" content="EmarketMall系统">
-    <% pageContext.setAttribute("ctx", request.getContextPath());%>
-    <link href="${ctx}/static/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="${ctx}/static/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="${ctx}/static/css/style.css" rel="stylesheet"/>
+    <!-- 引入统一资源管理 -->
+    <%@ include file="common/resources.jsp" %>
     <link href="${ctx}/static/css/login.min.css" rel="stylesheet"/>
     <link href="${ctx}/static/ajax/easy-ui/easy-ui.css" rel="stylesheet"/>
-
-    <!-- 360浏览器急速模式 -->
-    <meta name="renderer" content="webkit">
-    <!-- 避免IE使用兼容模式 -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="shortcut icon" href="${ctx}/static/favicon.ico"/>
 </head>
 <body class="signin">
 <div class="signinpanel">

@@ -110,6 +110,24 @@ public interface OrdersService {
     boolean createOrder(Orders orders);
 
     /**
+     * 从商品列表创建订单
+     *
+     * @param orders 订单基本信息
+     * @param orderItems 订单商品列表
+     * @return 结果
+     */
+    boolean createOrder(Orders orders, List<org.example.emarketmall.req.OrderItemReq> orderItems);
+
+    /**
+     * 从购物车创建订单
+     *
+     * @param orders 订单基本信息
+     * @param cartItems 购物车商品列表
+     * @return 结果
+     */
+    boolean createOrderFromCart(Orders orders, List<org.example.emarketmall.entity.OrderCart> cartItems);
+
+    /**
      * 取消订单
      *
      * @param orderId 订单ID
@@ -133,4 +151,60 @@ public interface OrdersService {
      * @return 结果
      */
     boolean payOrder(Integer orderId, String paymentTransactionId);
+
+    /**
+     * 发货订单
+     *
+     * @param orderId 订单ID
+     * @return 结果
+     */
+    boolean shipOrder(Integer orderId);
+
+    /**
+     * 取消订单（包含用户权限验证）
+     *
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @return 结果
+     */
+    boolean cancelOrderWithValidation(Integer orderId, Integer userId);
+
+    /**
+     * 确认收货（包含用户权限验证）
+     *
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @return 结果
+     */
+    boolean confirmReceiveWithValidation(Integer orderId, Integer userId);
+
+    /**
+     * 支付订单（包含用户权限验证）
+     *
+     * @param orderId 订单ID
+     * @param userId 用户ID
+     * @param paymentTransactionId 支付交易号
+     * @return 结果
+     */
+    boolean payOrderWithValidation(Integer orderId, Integer userId, String paymentTransactionId);
+
+    /**
+     * 创建订单（包含库存验证）
+     *
+     * @param orders 订单基本信息
+     * @param orderItems 订单商品列表
+     * @param userId 用户ID
+     * @return 结果
+     */
+    boolean createOrderWithValidation(Orders orders, List<org.example.emarketmall.req.OrderItemReq> orderItems, Integer userId);
+
+    /**
+     * 从购物车创建订单（包含库存验证）
+     *
+     * @param orders 订单基本信息
+     * @param cartIds 购物车ID列表
+     * @param userId 用户ID
+     * @return 结果
+     */
+    boolean createOrderFromCartWithValidation(Orders orders, List<Integer> cartIds, Integer userId);
 }

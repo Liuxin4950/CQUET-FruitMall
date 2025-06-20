@@ -141,6 +141,19 @@ public interface OrderCartService {
      * @param userId 用户ID
      * @param productId 商品ID
      * @param amount 商品数量
+     * @param price 商品价格
+     * @param productName 商品名称
+     * @param productPic 商品图片
+     * @return 结果
+     */
+    boolean addToCart(Integer userId, String productId, Integer amount, java.math.BigDecimal price, String productName, String productPic);
+
+    /**
+     * 添加商品到购物车（简化版本，自动获取商品信息）
+     *
+     * @param userId 用户ID
+     * @param productId 商品ID
+     * @param amount 商品数量
      * @return 结果
      */
     boolean addToCart(Integer userId, String productId, Integer amount);

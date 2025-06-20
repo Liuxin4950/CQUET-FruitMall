@@ -219,18 +219,10 @@ public class OrdersController extends HttpServlet {
 
     private AjaxResult shipOrder(String id) {
         if (StringUtils.isNotEmpty(id)) {
-            OrdersResl ordersResl = ordersService.selectOrdersById(Integer.parseInt(id));
-            if (ordersResl != null && ordersResl.getOrderStatus() == 2) { // 只有已支付的订单才能发货
-                // 创建Orders对象用于更新
-                Orders orders = new Orders();
-                orders.setId(ordersResl.getId());
-                orders.setOrderStatus(3); // 已发货
-                orders.setShipTime(new java.util.Date()); // 设置发货时间
-                if (ordersService.updateOrders(orders) > 0) {
-                    return AjaxResult.success("发货成功");
-                }
+            if (ordersService.shipOrder(Integer.parseInt(id))) {
+                return AjaxResult.success("发货成功");
             } else {
-                return AjaxResult.error("订单状态不正确，无法发货");
+                return AjaxResult.error("发货失败，请检查订单状态");
             }
         }
         return AjaxResult.error("发货失败");

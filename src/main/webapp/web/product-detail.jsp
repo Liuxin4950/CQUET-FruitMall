@@ -607,14 +607,43 @@
         // 加入购物车
         function addToCart() {
             <% if (session.getAttribute("loginName") != null) { %>
-                var quantity = $('#quantity').val();
+                var quantity = parseInt($('#quantity').val());
+                var productId = window.currentProductId;
+                
+                if (!productId) {
+                    alert('商品信息加载中，请稍后重试');
+                    return;
+                }
+                
+                if (quantity <= 0) {
+                    alert('请选择正确的商品数量');
+                    return;
+                }
+                
                 showLoading('正在添加到购物车...');
                 
-                // 模拟AJAX请求
-                setTimeout(function() {
-                    hideLoading();
-                    alert('商品已成功加入购物车！数量：' + quantity);
-                }, 1000);
+                $.ajax({
+                    url: '${ctx}/web/cart/add',
+                    type: 'POST',
+                    data: {
+                        productId: productId,
+                        quantity: quantity
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        hideLoading();
+                        if (response.code === 0) {
+                            alert('商品已成功加入购物车！数量：' + quantity);
+                        } else {
+                            alert(response.msg || '添加购物车失败');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        hideLoading();
+                        console.error('添加购物车失败:', error);
+                        alert('网络错误，请稍后重试');
+                    }
+                });
             <% } else { %>
                 alert('请先登录后再购买商品');
                 window.location.href = '${ctx}/login.jsp';
@@ -643,29 +672,137 @@
             var urlParams = new URLSearchParams(window.location.search);
             var productId = urlParams.get('id');
             
-            // 模拟根据ID加载不同商品信息
             if (productId) {
-                loadProductInfo(productId);
+                loadProductDetail(productId);
+            } else {
+                alert('商品ID不能为空');
+                window.location.href = '${ctx}/web/products.jsp';
             }
         });
         
-        function loadProductInfo(productId) {
-            // 模拟商品数据
-            var products = {
-                '1': {name: 'iPhone 14 Pro', price: 7999, icon: 'fa-mobile'},
-                '2': {name: 'MacBook Pro', price: 12999, icon: 'fa-laptop'},
-                '3': {name: 'Samsung Galaxy S23', price: 5999, icon: 'fa-mobile'},
-                '4': {name: 'Nike Air Max', price: 899, icon: 'fa-shopping-bag'},
-                '5': {name: '智能电视', price: 3999, icon: 'fa-tv'}
-            };
+        // 调用后端API获取商品详情
+        function loadProductDetail(productId) {
+            showLoading('正在加载商品详情...');
             
-            var product = products[productId];
-            if (product) {
-                $('#productTitle').text(product.name);
-                $('#currentPrice').text('¥' + product.price.toFixed(2));
-                $('#mainImage').html('<i class="fa ' + product.icon + '"></i>');
-                $('.thumbnail.active').html('<i class="fa ' + product.icon + '"></i>');
+            $.ajax({
+                url: '${ctx}/web/product',
+                type: 'GET',
+                data: { opt: 'detail', id: productId },
+                dataType: 'json',
+                success: function(response) {
+                    hideLoading();
+                    if (response.code === 0 && response.data) {
+                        renderProductDetail(response.data);
+                    } else {
+                        alert(response.msg || '获取商品详情失败');
+                        window.location.href = '${ctx}/web/products.jsp';
+                    }
+                },
+                error: function(xhr, status, error) {
+                    hideLoading();
+                    console.error('获取商品详情失败:', error);
+                    alert('网络错误，请稍后重试');
+                }
+            });
+        }
+        
+        // 渲染商品详情
+        function renderProductDetail(product) {
+            // 更新商品基本信息
+            $('#productTitle').text(product.productName || '商品名称');
+            $('#currentPrice').text('¥' + (product.price || 0).toFixed(2));
+            
+            // 更新商品图标
+            var icon = getProductIcon(product.productName || '');
+            $('#mainImage').html('<i class="fa ' + icon + '"></i>');
+            $('.thumbnail.active').html('<i class="fa ' + icon + '"></i>');
+            
+            // 更新评分
+            if (product.rating) {
+                var stars = '';
+                var fullStars = Math.floor(product.rating);
+                var hasHalfStar = product.rating % 1 >= 0.5;
+                
+                for (var i = 0; i < fullStars; i++) {
+                    stars += '<i class="fa fa-star"></i>';
+                }
+                if (hasHalfStar) {
+                    stars += '<i class="fa fa-star-half-o"></i>';
+                }
+                var emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                for (var i = 0; i < emptyStars; i++) {
+                    stars += '<i class="fa fa-star-o"></i>';
+                }
+                
+                $('.rating-stars').html(stars);
+                $('.rating-text').text('(' + (product.rating || 0).toFixed(1) + '分)');
             }
+            
+            // 更新商品规格
+            var specsHtml = '';
+            if (product.productCode) {
+                specsHtml += '<div class="spec-item"><div class="spec-label">商品编码:</div><div class="spec-value">' + product.productCode + '</div></div>';
+            }
+            if (product.originPlace) {
+                specsHtml += '<div class="spec-item"><div class="spec-label">产地:</div><div class="spec-value">' + product.originPlace + '</div></div>';
+            }
+            if (product.stock !== undefined) {
+                specsHtml += '<div class="spec-item"><div class="spec-label">库存:</div><div class="spec-value">' + product.stock + '件</div></div>';
+            }
+            if (product.sales !== undefined) {
+                specsHtml += '<div class="spec-item"><div class="spec-label">销量:</div><div class="spec-value">' + product.sales + '件</div></div>';
+            }
+            if (product.shelfLife) {
+                specsHtml += '<div class="spec-item"><div class="spec-label">保质期:</div><div class="spec-value">' + product.shelfLife + '</div></div>';
+            }
+            if (product.storageMethod) {
+                specsHtml += '<div class="spec-item"><div class="spec-label">储存方式:</div><div class="spec-value">' + product.storageMethod + '</div></div>';
+            }
+            
+            $('.product-specs').html(specsHtml);
+            
+            // 更新商品描述
+            if (product.description) {
+                $('#description .description-content').html(
+                    '<h3>产品介绍</h3>' +
+                    '<p>' + product.description + '</p>' +
+                    (product.nutritionInfo ? '<h4>营养信息</h4><p>' + product.nutritionInfo + '</p>' : '')
+                );
+            }
+            
+            // 更新规格参数表格
+            var specsTableHtml = '';
+            if (product.productCode) specsTableHtml += '<tr><td><strong>商品编码</strong></td><td>' + product.productCode + '</td></tr>';
+            if (product.originPlace) specsTableHtml += '<tr><td><strong>产地</strong></td><td>' + product.originPlace + '</td></tr>';
+            if (product.rating) specsTableHtml += '<tr><td><strong>评分</strong></td><td>' + product.rating.toFixed(1) + '分</td></tr>';
+            if (product.sales !== undefined) specsTableHtml += '<tr><td><strong>销量</strong></td><td>' + product.sales + '件</td></tr>';
+            if (product.stock !== undefined) specsTableHtml += '<tr><td><strong>库存</strong></td><td>' + product.stock + '件</td></tr>';
+            if (product.shelfLife) specsTableHtml += '<tr><td><strong>保质期</strong></td><td>' + product.shelfLife + '</td></tr>';
+            if (product.storageMethod) specsTableHtml += '<tr><td><strong>储存方式</strong></td><td>' + product.storageMethod + '</td></tr>';
+            if (product.nutritionInfo) specsTableHtml += '<tr><td><strong>营养信息</strong></td><td>' + product.nutritionInfo + '</td></tr>';
+            
+            $('#specifications table').html(specsTableHtml);
+            
+            // 存储商品ID用于购物车操作
+            window.currentProductId = product.id;
+        }
+        
+        // 根据商品名称获取图标
+        function getProductIcon(productName) {
+            var name = productName.toLowerCase();
+            if (name.includes('苹果') || name.includes('apple')) return 'fa-apple';
+            if (name.includes('香蕉') || name.includes('banana')) return 'fa-pagelines';
+            if (name.includes('橙') || name.includes('orange')) return 'fa-circle';
+            if (name.includes('葡萄') || name.includes('grape')) return 'fa-circle-o';
+            if (name.includes('草莓') || name.includes('strawberry')) return 'fa-heart';
+            if (name.includes('西瓜') || name.includes('watermelon')) return 'fa-circle';
+            if (name.includes('菠萝') || name.includes('pineapple')) return 'fa-star';
+            if (name.includes('芒果') || name.includes('mango')) return 'fa-leaf';
+            if (name.includes('樱桃') || name.includes('cherry')) return 'fa-circle';
+            if (name.includes('桃') || name.includes('peach')) return 'fa-heart-o';
+            if (name.includes('梨') || name.includes('pear')) return 'fa-lightbulb-o';
+            if (name.includes('柠檬') || name.includes('lemon')) return 'fa-sun-o';
+            return 'fa-leaf'; // 默认图标
         }
     </script>
 </body>
