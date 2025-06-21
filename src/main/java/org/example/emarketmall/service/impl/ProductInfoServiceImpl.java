@@ -36,6 +36,7 @@ public class ProductInfoServiceImpl implements ProductInfoService {
     @Override
     public int insertProductInfo(ProductInfo productInfo) throws Exception {
         // 设置创建时间和更新时间
+        productInfo.setDelFlag(0); // 设置为未删除状态
         productInfo.setCreatedTime(DateUtils.getTime());
         productInfo.setUpdatedTime(DateUtils.getTime());
         // 生成商品编码
@@ -53,6 +54,18 @@ public class ProductInfoServiceImpl implements ProductInfoService {
     public int updateProductInfo(ProductInfo productInfo) throws Exception {
         // 设置更新时间
         productInfo.setUpdatedTime(DateUtils.getTime());
+        productInfo.setCreatedBy(null); // 更新时不修改创建人
+        
+        return productInfoDao.updateProductInfo(productInfo);
+    }
+
+    @Override
+    public int updateProductInfo(ProductInfo productInfo, String updatedBy) throws Exception {
+        // 设置更新时间
+        productInfo.setUpdatedTime(DateUtils.getTime());
+        // 设置更新人为当前登录的管理员
+        productInfo.setUpdatedBy(updatedBy);
+        productInfo.setCreatedBy(null); // 更新时不修改创建人
         
         return productInfoDao.updateProductInfo(productInfo);
     }

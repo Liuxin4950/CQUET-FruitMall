@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.example.emarketmall.common.AjaxResult;
 import org.example.emarketmall.common.TableDataInfo;
 import org.example.emarketmall.entity.ProductInfo;
+import org.example.emarketmall.entity.StaffInfo;
 import org.example.emarketmall.service.ProductInfoService;
 import org.example.emarketmall.service.impl.ProductInfoServiceImpl;
 import org.example.emarketmall.utils.BeanUtils;
@@ -71,14 +72,6 @@ public class ProductInfoController extends HttpServlet {
         if (productInfo == null) {
             productInfo = null;
         }
-        // 只有在POST请求且需要ProductInfo对象时才从请求体获取
-//        if ("POST".equalsIgnoreCase(req.getMethod()) && ("add".equals(opt) || "edit".equals(opt))) {
-//            productInfo = ServletUtils.getObjectFromPayload(req, ProductInfo.class);
-//            System.out.println("productInfo: " + productInfo);
-//            if (BeanUtils.isEmpty(productInfo)) {
-//                productInfo = null;
-//            }
-//        }
 
         try {
             switch (opt) {
@@ -111,7 +104,7 @@ public class ProductInfoController extends HttpServlet {
                     }
                     if ("POST".equalsIgnoreCase(req.getMethod())) {
                         if (productInfo != null) {
-                            ServletUtils.renderString(resp, JSON.toJSONString(editProduct(id, productInfo)));
+                            ServletUtils.renderString(resp, JSON.toJSONString(editProduct(id, productInfo, req)));
                         } else {
                             ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("编辑商品信息对象内容异常")));
                         }
@@ -169,9 +162,7 @@ public class ProductInfoController extends HttpServlet {
         try {
             if (productInfo != null) {
                 // 设置创建时间和更新时间
-                productInfo.setCreatedTime(DateUtils.getTime());
-                productInfo.setUpdatedTime(DateUtils.getTime());
-                productInfo.setDelFlag(0); // 设置为未删除状态
+
                 
                 if (productInfoService.insertProductInfo(productInfo) > 0) {
                     return AjaxResult.success("新增商品信息成功");
@@ -187,9 +178,13 @@ public class ProductInfoController extends HttpServlet {
     /**
      * 修改商品
      */
-    private AjaxResult editProduct(String id, ProductInfo productInfo) {
+    private AjaxResult editProduct(String id, ProductInfo productInfo, HttpServletRequest req) {
         try {
             if (StringUtils.isNotEmpty(id) && productInfo != null) {
+                // 获取当前登录的管理员信息
+                StaffInfo staffInfo = (StaffInfo) req.getSession().getAttribute("staffInfo");
+                String currentAdmin = staffInfo != null ? staffInfo.getLoginName() : "system";
+                
                 ProductInfo destProduct = productInfoService.selectProductInfoById(Integer.parseInt(id));
                 if (destProduct != null) {
                     // 更新商品信息
@@ -211,7 +206,8 @@ public class ProductInfoController extends HttpServlet {
                     destProduct.setStock(productInfo.getStock());
                     destProduct.setUpdatedTime(DateUtils.getTime());
                     
-                    if (productInfoService.updateProductInfo(destProduct) > 0) {
+                    // 调用带更新人参数的方法
+                    if (productInfoService.updateProductInfo(destProduct, currentAdmin) > 0) {
                         return AjaxResult.success("修改商品信息成功");
                     }
                 }

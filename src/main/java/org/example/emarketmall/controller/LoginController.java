@@ -60,6 +60,8 @@ public class LoginController extends HttpServlet {
             // 1. 先尝试管理员登录
             try {
                 StaffInfo staffInfo = staffInfoService.adminLogin(loginName, password);
+                System.out.println(staffInfo);
+
                 if (staffInfo != null) {
                     System.out.println("管理员登录成功：" + staffInfo.getLoginName());
                     // 设置会话信息
@@ -85,6 +87,7 @@ public class LoginController extends HttpServlet {
             if (!rememberMe) {
                 try {
                     UserInfo userInfo = loginService.login(loginName, password);
+                    System.out.println(userInfo);
                     if (userInfo != null) {
                         System.out.println("用户登录成功：" + userInfo.getLoginName());
                         req.getSession().setAttribute("userInfo", userInfo);

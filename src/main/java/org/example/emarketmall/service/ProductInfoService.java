@@ -39,6 +39,15 @@ public interface ProductInfoService {
     int updateProductInfo(ProductInfo productInfo) throws Exception;
 
     /**
+     * 修改商品信息（带更新人信息）
+     *
+     * @param productInfo 商品信息
+     * @param updatedBy 更新人
+     * @return 结果
+     */
+    int updateProductInfo(ProductInfo productInfo, String updatedBy) throws Exception;
+
+    /**
      * 删除商品信息
      *
      * @param id 商品ID

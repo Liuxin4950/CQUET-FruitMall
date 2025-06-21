@@ -14,7 +14,7 @@
             <div class="brand-wrapper">
                 <div class="brand-name-wrapper">
                     <a class="navbar-brand" href="${ctx}/admin/index.jsp">
-                        EmarketMall系统
+                        向日葵管理系统
                     </a>
                 </div>
             </div>
@@ -27,24 +27,24 @@
                 <li><a href="${ctx}/admin/user/user.jsp"><span class="glyphicon glyphicon-user"></span> 用户管理</a></li>
                 <li><a href="${ctx}/admin/product/product.jsp"><span class="glyphicon glyphicon-gift"></span> 商品管理</a></li>
                 <li><a href="${ctx}/admin/orders/orders.jsp"><span class="glyphicon glyphicon-align-left"></span> 订单管理</a></li>
-                <li><a href="${ctx}/admin/orders/orders.jsp"><span class="glyphicon glyphicon-shopping-cart"></span> 购物车管理</a></li>
+<%--                <li><a href="${ctx}/admin/orders/orders.jsp"><span class="glyphicon glyphicon-shopping-cart"></span> 购物车管理</a></li>--%>
 
                 <!-- Dropdown-->
-                <li class="panel panel-default" id="dropdown">
-                    <a data-toggle="collapse" href="#dropdown-lvl1">
-                        <span class="glyphicon glyphicon-paperclip"></span> 二级菜单
-                    </a>
-                    <!-- Dropdown level 1 -->
-                    <div id="dropdown-lvl1" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <ul class="nav navbar-nav">
-                                <li><a href="#">子菜单1</a></li>
-                                <li><a href="#">子菜单2</a></li>
-                                <li><a href="#">子菜单3</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </li>
+<%--                <li class="panel panel-default" id="dropdown">--%>
+<%--                    <a data-toggle="collapse" href="#dropdown-lvl1">--%>
+<%--                        <span class="glyphicon glyphicon-paperclip"></span> 二级菜单--%>
+<%--                    </a>--%>
+<%--                    <!-- Dropdown level 1 -->--%>
+<%--                    <div id="dropdown-lvl1" class="panel-collapse collapse">--%>
+<%--                        <div class="panel-body">--%>
+<%--                            <ul class="nav navbar-nav">--%>
+<%--                                <li><a href="#">子菜单1</a></li>--%>
+<%--                                <li><a href="#">子菜单2</a></li>--%>
+<%--                                <li><a href="#">子菜单3</a></li>--%>
+<%--                            </ul>--%>
+<%--                        </div>--%>
+<%--                    </div>--%>
+<%--                </li>--%>
             </ul>
         </div>
     </nav>
