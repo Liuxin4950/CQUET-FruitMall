@@ -689,8 +689,277 @@
         
         // 查看订单详情
         function viewOrderDetail(orderId) {
-            // 这里可以跳转到订单详情页面或弹出详情窗口
-            alert('订单详情功能开发中...');
+            if (!orderId) {
+                alert('订单ID不能为空');
+                return;
+            }
+            
+            // 调用后端接口获取订单详情
+            $.ajax({
+                url: '${ctx}/web/order/orderDetail',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ orderId: orderId }),
+                dataType: 'json'
+            }).done(function(data) {
+                console.log(data);
+                if (data && data.code === 0) {
+                    showOrderDetailModal(data.data);
+                } else {
+                    alert('获取订单详情失败：' + (data ? data.msg : '未知错误'));
+                }
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error('请求失败:', textStatus, errorThrown);
+                alert('网络错误，请稍后重试');
+            });
+        }
+        
+        // 显示订单详情弹窗
+        function showOrderDetailModal(order) {
+            // 创建遮罩层
+            const overlay = document.createElement('div');
+            overlay.className = 'modal-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+            
+            // 创建弹窗容器
+            const modal = document.createElement('div');
+            modal.className = 'order-detail-modal';
+            modal.style.cssText = `
+                background: white;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 800px;
+                max-height: 80%;
+                overflow-y: auto;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            `;
+            
+            // 创建弹窗内容
+            const modalContent = createOrderDetailContent(order);
+            modal.appendChild(modalContent);
+            
+            // 点击遮罩层关闭弹窗
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    document.body.removeChild(overlay);
+                }
+            });
+            
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+        }
+        
+        // 创建订单详情内容
+        function createOrderDetailContent(order) {
+            const container = document.createElement('div');
+            container.style.padding = '20px';
+            
+            // 标题栏
+            const header = document.createElement('div');
+            header.style.cssText = `
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            `;
+            
+            const title = document.createElement('h3');
+            title.textContent = '订单详情';
+            title.style.margin = '0';
+            
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '×';
+            closeBtn.style.cssText = `
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #999;
+            `;
+            closeBtn.addEventListener('click', function() {
+                const overlay = document.querySelector('.modal-overlay');
+                if (overlay) {
+                    document.body.removeChild(overlay);
+                }
+            });
+            
+            header.appendChild(title);
+            header.appendChild(closeBtn);
+            
+            // 订单基本信息
+            const orderInfo = document.createElement('div');
+            orderInfo.style.cssText = `
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            `;
+            
+            const statusClass = getStatusClass(order.orderStatus);
+            const statusText = getStatusText(order.orderStatus);
+            const orderDate = formatDate(order.createdTime);
+            
+            // 创建订单信息网格容器
+            const infoGrid = document.createElement('div');
+            infoGrid.style.cssText = 'display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 14px;';
+            
+            // 订单号
+            const orderNumDiv = document.createElement('div');
+            const orderNumLabel = document.createElement('strong');
+            orderNumLabel.textContent = '订单号：';
+            orderNumDiv.appendChild(orderNumLabel);
+            orderNumDiv.appendChild(document.createTextNode(order.orderNum || 'N/A'));
+            
+            // 订单状态
+            const statusDiv = document.createElement('div');
+            const statusLabel = document.createElement('strong');
+            statusLabel.textContent = '订单状态：';
+            const statusSpan = document.createElement('span');
+            statusSpan.className = statusClass;
+            statusSpan.textContent = statusText;
+            statusDiv.appendChild(statusLabel);
+            statusDiv.appendChild(statusSpan);
+            
+            // 下单时间
+            const timeDiv = document.createElement('div');
+            const timeLabel = document.createElement('strong');
+            timeLabel.textContent = '下单时间：';
+            timeDiv.appendChild(timeLabel);
+            timeDiv.appendChild(document.createTextNode(orderDate));
+            
+            // 实付金额
+            const moneyDiv = document.createElement('div');
+            const moneyLabel = document.createElement('strong');
+            moneyLabel.textContent = '实付金额：';
+            const moneySpan = document.createElement('span');
+            moneySpan.style.cssText = 'color: #e74c3c; font-weight: bold;';
+            moneySpan.textContent = '¥' + (order.paymentMoney || '0');
+            moneyDiv.appendChild(moneyLabel);
+            moneyDiv.appendChild(moneySpan);
+            
+            // 添加到网格
+            infoGrid.appendChild(orderNumDiv);
+            infoGrid.appendChild(statusDiv);
+            infoGrid.appendChild(timeDiv);
+            infoGrid.appendChild(moneyDiv);
+            
+            orderInfo.appendChild(infoGrid);
+            
+            // 商品列表
+            const productsTitle = document.createElement('h4');
+            productsTitle.textContent = '商品清单';
+            productsTitle.style.cssText = 'margin: 20px 0 10px 0; color: #333;';
+            
+            const productsList = document.createElement('div');
+            
+            // 检查orderDetails字段（根据用户提供的数据结构）
+            const orderDetails = order.orderDetails || order.orderDetailList || [];
+            
+            if (orderDetails && orderDetails.length > 0) {
+                orderDetails.forEach(function(detail) {
+                    const productItem = document.createElement('div');
+                    productItem.style.cssText = 'display: flex; align-items: center; padding: 15px; border: 1px solid #eee; border-radius: 5px; margin-bottom: 10px;';
+                    
+                    // 商品图标
+                    const iconDiv = document.createElement('div');
+                    iconDiv.style.cssText = 'width: 60px; height: 60px; background: #f0f0f0; border-radius: 5px; display: flex; align-items: center; justify-content: center; margin-right: 15px;';
+                    const icon = document.createElement('i');
+                    icon.className = 'fa fa-apple';
+                    icon.style.cssText = 'font-size: 24px; color: #999;';
+                    iconDiv.appendChild(icon);
+                    
+                    // 商品信息
+                    const infoDiv = document.createElement('div');
+                    infoDiv.style.cssText = 'flex: 1;';
+                    
+                    const nameDiv = document.createElement('div');
+                    nameDiv.style.cssText = 'font-weight: bold; margin-bottom: 5px;';
+                    nameDiv.textContent = detail.productName || '商品';
+                    
+                    const specDiv = document.createElement('div');
+                    specDiv.style.cssText = 'color: #666; font-size: 12px;';
+                    specDiv.textContent = '规格：' + (detail.productSpec || '标准装');
+                    
+                    infoDiv.appendChild(nameDiv);
+                    infoDiv.appendChild(specDiv);
+                    
+                    // 数量
+                    const quantityDiv = document.createElement('div');
+                    quantityDiv.style.cssText = 'text-align: center; margin: 0 20px;';
+                    
+                    const quantityLabel = document.createElement('div');
+                    quantityLabel.style.cssText = 'color: #666; font-size: 12px;';
+                    quantityLabel.textContent = '数量';
+                    
+                    const quantityValue = document.createElement('div');
+                    quantityValue.style.cssText = 'font-weight: bold;';
+                    quantityValue.textContent = '×' + (detail.amount || detail.quantity || '1');
+                    
+                    quantityDiv.appendChild(quantityLabel);
+                    quantityDiv.appendChild(quantityValue);
+                    
+                    // 单价
+                    const priceDiv = document.createElement('div');
+                    priceDiv.style.cssText = 'text-align: right;';
+                    
+                    const priceLabel = document.createElement('div');
+                    priceLabel.style.cssText = 'color: #666; font-size: 12px;';
+                    priceLabel.textContent = '单价';
+                    
+                    const priceValue = document.createElement('div');
+                    priceValue.style.cssText = 'color: #e74c3c; font-weight: bold;';
+                    priceValue.textContent = '¥' + (detail.productPrice || detail.price || '0');
+                    
+                    priceDiv.appendChild(priceLabel);
+                    priceDiv.appendChild(priceValue);
+                    
+                    // 组装商品项
+                    productItem.appendChild(iconDiv);
+                    productItem.appendChild(infoDiv);
+                    productItem.appendChild(quantityDiv);
+                    productItem.appendChild(priceDiv);
+                    
+                    productsList.appendChild(productItem);
+                });
+            } else {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.textContent = '暂无商品信息';
+                emptyMsg.style.cssText = 'text-align: center; color: #999; padding: 20px;';
+                productsList.appendChild(emptyMsg);
+            }
+            
+            // 组装内容
+            container.appendChild(header);
+            container.appendChild(orderInfo);
+            container.appendChild(productsTitle);
+            container.appendChild(productsList);
+            
+            return container;
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hours}:${minutes}`;
         }
         
         // 再次购买
@@ -708,10 +977,15 @@
             alert(message);
         }
         
-        // 回车搜索
-        $('#searchInput').keypress(function(e) {
-            if (e.which == 13) {
-                searchOrders();
+        // 回车搜索 - 原生JavaScript实现
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.which === 13 || e.keyCode === 13) {
+                        searchOrders();
+                    }
+                });
             }
         });
     </script>

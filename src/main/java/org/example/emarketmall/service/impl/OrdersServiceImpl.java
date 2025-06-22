@@ -44,9 +44,11 @@ public class OrdersServiceImpl implements OrdersService {
     public OrdersResl selectOrdersById(Integer orderId) {
         try {
             OrdersResl orders = ordersDao.selectOrdersById(orderId);
+            System.out.println("查询订单结果: " + orders);
             if (orders != null) {
                 // 查询订单详情
                 List<OrderDetail> orderDetails = orderDetailDao.selectOrderDetailByOrderId(orderId);
+                System.out.println("查询订单详情结果: " + orderDetails);
                 orders.setOrderDetails(orderDetails);
             }
             return orders;

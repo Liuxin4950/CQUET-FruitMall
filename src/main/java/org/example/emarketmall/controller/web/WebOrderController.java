@@ -130,27 +130,25 @@ public class WebOrderController extends HttpServlet {
         try {
             String orderIdStr = ServletUtils.getParamFromPayLoad(req, "orderId");
             String orderNum = ServletUtils.getParamFromPayLoad(req, "orderNum");
+            System.out.println("获取订单详情，订单ID：" + orderIdStr + ", 订单号：" + orderNum);
             
             if (StringUtils.isEmpty(orderIdStr) && StringUtils.isEmpty(orderNum)) {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("订单ID或订单号不能为空")));
                 return;
             }
-            
-            OrdersResl order = null;
-            
-            if (!StringUtils.isEmpty(orderIdStr)) {
-                Integer orderId = Integer.parseInt(orderIdStr);
-                order = ordersService.selectOrdersById(orderId);
-            } else {
-                order = ordersService.selectOrdersByOrderNum(orderNum);
-            }
-            
+
+            Integer orderId = Integer.parseInt(orderIdStr);
+            OrdersResl order = ordersService.selectOrdersById(orderId);
+
+
             if (order == null || !order.getUserId().equals(userId)) {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("订单不存在或无权限访问")));
                 return;
             }
-            
+
+            System.out.println("查询到订单：" + order.getOrderNum() + ", 用户ID：" + order.getUserId());
             ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.success(order)));
+
         } catch (Exception e) {
             e.printStackTrace();
             ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("获取订单详情失败：" + e.getMessage())));
