@@ -14,6 +14,7 @@ import org.example.emarketmall.utils.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.text.SimpleDateFormat;
 
 /**
  * @Description: 订单服务实现类
@@ -28,7 +29,7 @@ public class OrdersServiceImpl implements OrdersService {
         ordersDao = new OrdersDaoImpl();
         orderDetailDao = new OrderDetailDaoImpl();
     }
-
+    //以下是管理员的方法
     @Override
     public List<OrdersResl> selectOrdersList(Orders orders) {
         try {
@@ -81,17 +82,19 @@ public class OrdersServiceImpl implements OrdersService {
         return null;
     }
 
+
     @Override
     public List<OrdersResl> selectOrdersByStatus(String orderStatus) {
         try {
             // 将String类型的orderStatus转换为Integer类型
-            Integer statusCode = convertOrderStatusToCode(orderStatus);
+            Integer statusCode = Integer.parseInt(orderStatus);
             return ordersDao.selectOrdersByStatus(statusCode);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
+
 
     @Override
     public int insertOrders(Orders orders) {
@@ -131,7 +134,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public int countOrders(Orders orders) {
-        return ordersDao.countOrders(orders);
+        return (int) ordersDao.countOrders(orders);
     }
 
     @Override
@@ -149,7 +152,7 @@ public class OrdersServiceImpl implements OrdersService {
             }
             orders.setCreatedTime(DateUtils.getTime());
             orders.setUpdatedTime(DateUtils.getTime());
-            
+
             // 插入订单
             int result = ordersDao.insertOrders(orders);
             if (result > 0 && orders.getOrderDetails() != null && !orders.getOrderDetails().isEmpty()) {
@@ -170,109 +173,13 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public boolean createOrder(Orders orders, List<org.example.emarketmall.req.OrderItemReq> orderItems) {
-        try {
-            // 设置订单基本信息
-            orders.setOrderNum(generateOrderNum());
-            orders.setOrderStatus(1); // 待支付
-            orders.setCreatedTime(DateUtils.getTime());
-            orders.setUpdatedTime(DateUtils.getTime());
-            orders.setCreatedBy("system");
-            
-            // 计算商品总金额
-            java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
-            for (org.example.emarketmall.req.OrderItemReq item : orderItems) {
-                java.math.BigDecimal itemTotal = item.getProductPrice().multiply(new java.math.BigDecimal(item.getAmount()));
-                totalAmount = totalAmount.add(itemTotal);
-            }
-            
-            // 计算订单最终金额（商品总额 + 运费 - 优惠金额）
-            java.math.BigDecimal shippingMoney = orders.getShippingMoney() != null ? orders.getShippingMoney() : java.math.BigDecimal.ZERO;
-            java.math.BigDecimal districtMoney = orders.getDistrictMoney() != null ? orders.getDistrictMoney() : java.math.BigDecimal.ZERO;
-            java.math.BigDecimal orderMoney = totalAmount.add(shippingMoney).subtract(districtMoney);
-            
-            orders.setOrderMoney(orderMoney);
-            orders.setPaymentMoney(orderMoney);
-            
-            // 创建订单详情列表
-            java.util.List<OrderDetail> orderDetails = new java.util.ArrayList<>();
-            for (org.example.emarketmall.req.OrderItemReq item : orderItems) {
-                OrderDetail detail = new OrderDetail();
-                detail.setProductId(item.getProductId());
-                detail.setProductName(item.getProductName());
-                detail.setAmount(item.getAmount());
-                detail.setProductPrice(item.getProductPrice());
-                detail.setCreatedTime(DateUtils.getTime());
-                detail.setUpdatedTime(DateUtils.getTime());
-                detail.setCreatedBy("system");
-                orderDetails.add(detail);
-            }
-            orders.setOrderDetails(orderDetails);
-            
-            // 调用原有的创建订单方法
-            return createOrder(orders);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
-    public boolean createOrderFromCart(Orders orders, List<org.example.emarketmall.entity.OrderCart> cartItems) {
-        try {
-            // 设置订单基本信息
-            orders.setOrderNum(generateOrderNum());
-            orders.setOrderStatus(1); // 待支付
-            orders.setCreatedTime(DateUtils.getTime());
-            orders.setUpdatedTime(DateUtils.getTime());
-            orders.setCreatedBy("system");
-            
-            // 计算商品总金额
-            java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
-            for (org.example.emarketmall.entity.OrderCart cart : cartItems) {
-                java.math.BigDecimal itemTotal = cart.getPrice().multiply(new java.math.BigDecimal(cart.getAmount()));
-                totalAmount = totalAmount.add(itemTotal);
-            }
-            
-            // 计算订单最终金额（商品总额 + 运费 - 优惠金额）
-            java.math.BigDecimal shippingMoney = orders.getShippingMoney() != null ? orders.getShippingMoney() : java.math.BigDecimal.ZERO;
-            java.math.BigDecimal districtMoney = orders.getDistrictMoney() != null ? orders.getDistrictMoney() : java.math.BigDecimal.ZERO;
-            java.math.BigDecimal orderMoney = totalAmount.add(shippingMoney).subtract(districtMoney);
-            
-            orders.setOrderMoney(orderMoney);
-            orders.setPaymentMoney(orderMoney);
-            
-            // 创建订单详情列表
-            java.util.List<OrderDetail> orderDetails = new java.util.ArrayList<>();
-            for (org.example.emarketmall.entity.OrderCart cart : cartItems) {
-                OrderDetail detail = new OrderDetail();
-                detail.setProductId(Integer.parseInt(cart.getProductId()));
-                detail.setProductName(cart.getProductName());
-                detail.setAmount(cart.getAmount());
-                detail.setProductPrice(cart.getPrice());
-                detail.setCreatedTime(DateUtils.getTime());
-                detail.setUpdatedTime(DateUtils.getTime());
-                detail.setCreatedBy("system");
-                orderDetails.add(detail);
-            }
-            orders.setOrderDetails(orderDetails);
-            
-            // 调用原有的创建订单方法
-            return createOrder(orders);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    @Override
     public boolean cancelOrder(Integer orderId) {
         try {
             Orders orders = new Orders();
             orders.setId(orderId);
             orders.setOrderStatus(5); // 已取消
             orders.setUpdatedTime(DateUtils.getTime());
-            
+
             int result = ordersDao.updateOrders(orderId, orders);
             return result > 0;
         } catch (Exception e) {
@@ -289,7 +196,7 @@ public class OrdersServiceImpl implements OrdersService {
             orders.setOrderStatus(4); // 已完成
             orders.setReceiveTime(new Date());
             orders.setUpdatedTime(DateUtils.getTime());
-            
+
             int result = ordersDao.updateOrders(orderId, orders);
             return result > 0;
         } catch (Exception e) {
@@ -299,218 +206,86 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     @Override
-    public boolean payOrder(Integer orderId, String paymentTransactionId) {
+    public boolean payOrder(Integer orderId, String paymentTransactionId,Integer paymentMethod) {
         try {
             Orders orders = new Orders();
             orders.setId(orderId);
             orders.setOrderStatus(2); // 已支付
             orders.setPaymentTransactionId(paymentTransactionId);
             orders.setPayTime(new Date());
-            
-            return ordersDao.updateOrders(orderId, orders) > 0;
+            orders.setUpdatedTime(DateUtils.getTime());
+            orders.setPaymentMethod(paymentMethod);
+            // 如果有支付金额，可以设置
+            int result = ordersDao.updateOrders(orderId, orders);
+            return result > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    //以上是管理员界面所使用的方法不要动他们
+
+    
     @Override
     public boolean shipOrder(Integer orderId) {
-        try {
-            // 先查询订单状态
-            OrdersResl existingOrder = ordersDao.selectOrdersById(orderId);
-            if (existingOrder == null) {
-                return false;
-            }
-            
-            // 只有已支付的订单才能发货
-            if (existingOrder.getOrderStatus() != 2) {
-                return false;
-            }
-            
-            Orders orders = new Orders();
-            orders.setId(orderId);
-            orders.setOrderStatus(3); // 已发货
-            orders.setShipTime(new Date());
-            
-            return ordersDao.updateOrders(orderId, orders) > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
+        return updateOrderStatus(orderId, 3) > 0; // 3表示已发货
     }
+
+//    @Override
+//    public boolean createOrder(Orders orders) {
+//        try {
+//            // 生成订单编号
+//            orders.setOrderNum(generateOrderNum());
+//            orders.setOrderStatus(1); // 待支付
+//            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//            String currentTime = sdf.format(new Date());
+//            orders.setCreatedTime(currentTime);
+//            orders.setUpdatedTime(currentTime);
+//            orders.setCreatedBy("system");
+//
+//            // 插入订单主表
+//            int result = ordersDao.insertOrders(orders);
+//            if (result > 0 && orders.getOrderDetails() != null && !orders.getOrderDetails().isEmpty()) {
+//                // 通过订单编号查询刚插入的订单获取ID
+//                OrdersResl insertedOrder = ordersDao.selectOrdersByOrderNum(orders.getOrderNum());
+//                if (insertedOrder != null) {
+//                    orders.setId(insertedOrder.getId());
+//                }
+//
+//                // 设置订单详情的订单ID
+//                for (OrderDetail detail : orders.getOrderDetails()) {
+//                    detail.setOrderId(orders.getId());
+//                    detail.setCreatedTime(currentTime);
+//                    detail.setUpdatedTime(currentTime);
+//                    detail.setCreatedBy("system");
+//                }
+//
+//                // 批量插入订单详情
+//                int detailResult = orderDetailDao.insertOrderDetailBatch(orders.getOrderDetails());
+//                if (detailResult <= 0) {
+//                    throw new RuntimeException("订单详情插入失败");
+//                }
+//            }
+//
+//            return result > 0;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw new RuntimeException(e.getMessage());
+//        }
+//    }
+
+
 
     /**
      * 生成订单编号
-     * @return 订单编号
      */
     private String generateOrderNum() {
-        // 使用UUID生成唯一订单号
-        String uuid = UUID.randomUUID().toString().replace("-", "");
-        // 截取前16位作为订单号
-        return uuid.substring(0, 16).toUpperCase();
+        return "ORD" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
-
     /**
      * 将订单状态字符串转换为状态码
      * @param orderStatus 订单状态字符串
      * @return 状态码
      */
-    private Integer convertOrderStatusToCode(String orderStatus) {
-        if (StringUtils.isEmpty(orderStatus)) {
-            return 0; // 默认状态
-        }
-        switch (orderStatus) {
-            case "待支付":
-                return 1;
-            case "已支付":
-                return 2;
-            case "已发货":
-                return 3;
-            case "已完成":
-                return 4;
-            case "已取消":
-                return 5;
-            default:
-                return 0;
-        }
-    }
-
-    @Override
-    public boolean cancelOrderWithValidation(Integer orderId, Integer userId) {
-        try {
-            // 验证订单是否属于当前用户
-            OrdersResl order = selectOrdersById(orderId);
-            if (order == null || !order.getUserId().equals(userId)) {
-                throw new RuntimeException("订单不存在");
-            }
-            
-            // 只有待支付状态的订单才能取消
-            if (!Integer.valueOf(1).equals(order.getOrderStatus())) { // 1表示待支付
-                throw new RuntimeException("订单状态不允许取消");
-            }
-            
-            return cancelOrder(orderId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Override
-    public boolean confirmReceiveWithValidation(Integer orderId, Integer userId) {
-        try {
-            // 验证订单是否属于当前用户
-            OrdersResl order = selectOrdersById(orderId);
-            if (order == null || !order.getUserId().equals(userId)) {
-                throw new RuntimeException("订单不存在");
-            }
-            
-            // 只有已发货状态的订单才能确认收货
-            if (!Integer.valueOf(3).equals(order.getOrderStatus())) { // 3表示已发货
-                throw new RuntimeException("订单状态不允许确认收货");
-            }
-            
-            return confirmReceive(orderId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Override
-    public boolean payOrderWithValidation(Integer orderId, Integer userId, String paymentTransactionId) {
-        try {
-            // 验证订单是否属于当前用户
-            OrdersResl order = selectOrdersById(orderId);
-            if (order == null || !order.getUserId().equals(userId)) {
-                throw new RuntimeException("订单不存在");
-            }
-            
-            // 只有待支付状态的订单才能支付
-            if (!Integer.valueOf(1).equals(order.getOrderStatus())) { // 1表示待支付
-                throw new RuntimeException("订单状态不允许支付");
-            }
-            
-            // 生成支付交易号（如果没有提供）
-            if (StringUtils.isEmpty(paymentTransactionId)) {
-                paymentTransactionId = "PAY" + System.currentTimeMillis();
-            }
-            
-            return payOrder(orderId, paymentTransactionId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Override
-    public boolean createOrderWithValidation(Orders orders, List<org.example.emarketmall.req.OrderItemReq> orderItems, Integer userId) {
-        try {
-            // 验证商品库存
-            org.example.emarketmall.service.ProductInfoService productInfoService = new org.example.emarketmall.service.impl.ProductInfoServiceImpl();
-            for (org.example.emarketmall.req.OrderItemReq item : orderItems) {
-                org.example.emarketmall.entity.ProductInfo product = productInfoService.selectProductInfoById(item.getProductId());
-                if (product == null) {
-                    throw new RuntimeException("商品不存在：" + item.getProductName());
-                }
-                if (product.getStock() < item.getAmount()) {
-                    throw new RuntimeException("商品库存不足：" + item.getProductName());
-                }
-            }
-            
-            // 设置用户ID
-            orders.setUserId(userId);
-            
-            return createOrder(orders, orderItems);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
-    @Override
-    public boolean createOrderFromCartWithValidation(Orders orders, List<Integer> cartIds, Integer userId) {
-        try {
-            // 获取购物车商品
-            org.example.emarketmall.service.OrderCartService orderCartService = new org.example.emarketmall.service.impl.OrderCartServiceImpl();
-            org.example.emarketmall.service.ProductInfoService productInfoService = new org.example.emarketmall.service.impl.ProductInfoServiceImpl();
-            
-            List<org.example.emarketmall.entity.OrderCart> cartItems = new java.util.ArrayList<>();
-            for (Integer cartId : cartIds) {
-                org.example.emarketmall.entity.OrderCart cart = orderCartService.selectOrderCartById(cartId);
-                if (cart == null || !cart.getUserId().equals(userId)) {
-                    throw new RuntimeException("购物车信息不存在");
-                }
-                cartItems.add(cart);
-            }
-            
-            // 验证商品库存
-            for (org.example.emarketmall.entity.OrderCart cart : cartItems) {
-                org.example.emarketmall.entity.ProductInfo product = productInfoService.selectProductInfoById(Integer.parseInt(cart.getProductId()));
-                if (product == null) {
-                    throw new RuntimeException("商品不存在：" + cart.getProductName());
-                }
-                if (product.getStock() < cart.getAmount()) {
-                    throw new RuntimeException("商品库存不足：" + cart.getProductName());
-                }
-            }
-            
-            // 设置用户ID
-            orders.setUserId(userId);
-            
-            // 创建订单
-            boolean result = createOrderFromCart(orders, cartItems);
-            if (result) {
-                // 删除购物车中的商品
-                Integer[] cartIdArray = cartIds.toArray(new Integer[0]);
-                orderCartService.deleteOrderCartByIds(cartIdArray);
-            }
-            
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e.getMessage());
-        }
-    }
 }

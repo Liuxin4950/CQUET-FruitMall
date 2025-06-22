@@ -6,8 +6,8 @@ import org.example.emarketmall.resl.OrdersResl;
 import java.util.List;
 
 /**
- * @Description: 订单服务接口
- * @author: system
+ * @Description: 订单服务接口（简化版）
+ * @author: 若若
  * @date: 2024年12月19日
  */
 public interface OrdersService {
@@ -96,36 +96,21 @@ public interface OrdersService {
     /**
      * 统计订单数量
      *
-     * @param orders 订单查询条件
-     * @return 订单数量
+     * @param orders 订单信息
+     * @return 结果
      */
     int countOrders(Orders orders);
 
+    // ========== 核心订单操作方法（简化版） ==========
+
     /**
      * 创建订单（包含订单详情）
+     * 这是最核心的创建订单方法，直接传入完整的订单对象
      *
      * @param orders 订单信息（包含订单详情列表）
      * @return 结果
      */
     boolean createOrder(Orders orders);
-
-    /**
-     * 从商品列表创建订单
-     *
-     * @param orders 订单基本信息
-     * @param orderItems 订单商品列表
-     * @return 结果
-     */
-    boolean createOrder(Orders orders, List<org.example.emarketmall.req.OrderItemReq> orderItems);
-
-    /**
-     * 从购物车创建订单
-     *
-     * @param orders 订单基本信息
-     * @param cartItems 购物车商品列表
-     * @return 结果
-     */
-    boolean createOrderFromCart(Orders orders, List<org.example.emarketmall.entity.OrderCart> cartItems);
 
     /**
      * 取消订单
@@ -150,7 +135,7 @@ public interface OrdersService {
      * @param paymentTransactionId 支付交易号
      * @return 结果
      */
-    boolean payOrder(Integer orderId, String paymentTransactionId);
+    boolean payOrder(Integer orderId, String paymentTransactionId,Integer paymentMethod);
 
     /**
      * 发货订单
@@ -160,51 +145,5 @@ public interface OrdersService {
      */
     boolean shipOrder(Integer orderId);
 
-    /**
-     * 取消订单（包含用户权限验证）
-     *
-     * @param orderId 订单ID
-     * @param userId 用户ID
-     * @return 结果
-     */
-    boolean cancelOrderWithValidation(Integer orderId, Integer userId);
 
-    /**
-     * 确认收货（包含用户权限验证）
-     *
-     * @param orderId 订单ID
-     * @param userId 用户ID
-     * @return 结果
-     */
-    boolean confirmReceiveWithValidation(Integer orderId, Integer userId);
-
-    /**
-     * 支付订单（包含用户权限验证）
-     *
-     * @param orderId 订单ID
-     * @param userId 用户ID
-     * @param paymentTransactionId 支付交易号
-     * @return 结果
-     */
-    boolean payOrderWithValidation(Integer orderId, Integer userId, String paymentTransactionId);
-
-    /**
-     * 创建订单（包含库存验证）
-     *
-     * @param orders 订单基本信息
-     * @param orderItems 订单商品列表
-     * @param userId 用户ID
-     * @return 结果
-     */
-    boolean createOrderWithValidation(Orders orders, List<org.example.emarketmall.req.OrderItemReq> orderItems, Integer userId);
-
-    /**
-     * 从购物车创建订单（包含库存验证）
-     *
-     * @param orders 订单基本信息
-     * @param cartIds 购物车ID列表
-     * @param userId 用户ID
-     * @return 结果
-     */
-    boolean createOrderFromCartWithValidation(Orders orders, List<Integer> cartIds, Integer userId);
 }

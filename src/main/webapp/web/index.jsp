@@ -210,19 +210,21 @@
         
         .product-actions {
             display: flex;
-            gap: 8px;
+            gap: 4px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         
         .btn-buy {
             background-color: #e74c3c;
             border: none;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 15px;
             transition: all 0.3s ease;
-            font-size: 12px;
+            font-size: 11px;
             flex: 1;
+            min-width: 60px;
         }
         
         .btn-buy:hover {
@@ -234,11 +236,12 @@
             background-color: #3498db;
             border: none;
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 15px;
             transition: all 0.3s ease;
-            font-size: 12px;
+            font-size: 11px;
             flex: 1;
+            min-width: 60px;
         }
         
         .btn-detail:hover {
@@ -467,6 +470,42 @@
                 window.location.href = '${ctx}/login.jsp';
             <% } %>
         }
+        
+        // 立即购买
+        function buyNow(productId) {
+            <% if (session.getAttribute("loginName") != null) { %>
+                $.ajax({
+                    url: '${ctx}/web/order/createOrder',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: {
+                        productId: productId
+                    },
+                    success: function(response) {
+                        if (typeof hideLoading === 'function') {
+                            hideLoading();
+                        }
+                        if (response.code === 0) {
+                            alert('购买成功！订单号：' + response.data);
+                            // 可以跳转到订单详情页面
+                            // window.location.href = '${ctx}/web/order-detail.jsp?orderNum=' + response.data;
+                        } else {
+                            alert('订单创建失败：' + response.msg);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        if (typeof hideLoading === 'function') {
+                            hideLoading();
+                        }
+                        console.error('创建订单出错:', error);
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            <% } else { %>
+                alert('请先登录后再购买商品');
+                window.location.href = '${ctx}/login.jsp';
+            <% } %>
+        }
 
         // 查看更多商品
         function viewAllProducts() {
@@ -597,7 +636,10 @@
                    '<i class="fa fa-eye"></i> 详情' +
                    '</button>' +
                    '<button class="btn btn-buy" onclick="addToCart(' + product.id + ')">' +
-                   '<i class="fa fa-cart-plus"></i> 购买' +
+                   '<i class="fa fa-cart-plus"></i> 加入购物车' +
+                   '</button>' +
+                   '<button class="btn btn-buy" onclick="buyNow(' + product.id + ')" style="background-color: #e67e22;">' +
+                   '<i class="fa fa-shopping-cart"></i> 立即购买' +
                    '</button>' +
                    '</div>' +
                    '</div>';
@@ -696,7 +738,7 @@
                            '<p><strong>商品描述:</strong> ' + (product.description || '暂无描述') + '</p>' +
                            '<div style="margin-top: 20px;">' +
                            '<button class="btn btn-primary btn-lg" onclick="addToCart(' + product.id + '); $(\"#productDetailModal\").modal(\"hide\");">' +
-                           '<i class="fa fa-cart-plus"></i> 加入购物车' +
+                           '<i class="fa fa-cart-plus" onclick="addToCart(' + product.id + ')"></i> 加入购物车' +
                            '</button>' +
                            '</div>' +
                            '</div>' +

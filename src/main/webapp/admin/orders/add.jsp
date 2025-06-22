@@ -22,7 +22,7 @@
             <div class="col-sm-8">
                 <input name="userId" class="form-control" type="number" required>
             </div>
-        </div>
+        </div> 
         <div class="form-group">
             <label class="col-sm-3 control-label is-required">收货人：</label>
             <div class="col-sm-8">

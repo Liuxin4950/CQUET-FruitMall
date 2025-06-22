@@ -210,7 +210,7 @@ public class OrdersController extends HttpServlet {
 
     private AjaxResult payOrder(String id, String paymentTransactionId) {
         if (StringUtils.isNotEmpty(id) && StringUtils.isNotEmpty(paymentTransactionId)) {
-            if (ordersService.payOrder(Integer.parseInt(id), paymentTransactionId)) {
+            if (ordersService.payOrder(Integer.parseInt(id), paymentTransactionId,1)) {
                 return AjaxResult.success("支付订单成功");
             }
         }

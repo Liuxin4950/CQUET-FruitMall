@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+
 /**
  * @Description: 订单数据访问实现类
  * @author: system
@@ -198,13 +199,28 @@ public class OrdersDaoImpl implements OrdersDao {
             return 0;
         }
         
-        return new ObjectUtil<Orders>().add(sql, 
+        int result = new ObjectUtil<Orders>().add(sql, 
                 orders.getOrderNum(), orders.getUserId(), orders.getShippingUser(), orders.getAddress(),
                 orders.getPaymentMethod(), orders.getOrderMoney(), orders.getShippingMoney(), 
                 orders.getDistrictMoney(), orders.getPaymentMoney(), orders.getPayTime(), 
                 orders.getReceiveTime(), orders.getShipTime(), orders.getOrderStatus(), orders.getPaymentTransactionId(),
                 orders.getExpectedDeliveryTime(), orders.getCreatedBy(), orders.getCreatedTime(),
                 orders.getUpdatedBy(), orders.getUpdatedTime(), orders.getDelFlag(), orders.getRemark());
+        
+        // 如果插入成功，查询刚插入的订单ID并设置到orders对象中
+        if (result > 0) {
+            try {
+                String queryIdSql = "SELECT id FROM orders WHERE order_num = ? ORDER BY id DESC LIMIT 1";
+                List<Orders> ordersList = new ObjectUtil<Orders>().getList(queryIdSql, Orders.class, orders.getOrderNum());
+                if (ordersList != null && !ordersList.isEmpty()) {
+                    orders.setId(ordersList.get(0).getId());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return result;
     }
 
     @Override

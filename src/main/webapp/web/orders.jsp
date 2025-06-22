@@ -312,11 +312,11 @@
         <div class="order-filters">
             <div class="filter-tabs">
                 <button class="filter-tab active" data-status="all">全部订单</button>
-                <button class="filter-tab" data-status="pending">待付款</button>
-                <button class="filter-tab" data-status="paid">待发货</button>
-                <button class="filter-tab" data-status="shipped">待收货</button>
-                <button class="filter-tab" data-status="delivered">已完成</button>
-                <button class="filter-tab" data-status="cancelled">已取消</button>
+                <button class="filter-tab" data-status="1">待付款</button>
+                <button class="filter-tab" data-status="2">待发货</button>
+                <button class="filter-tab" data-status="3">待收货</button>
+                <button class="filter-tab" data-status="4">已完成</button>
+                <button class="filter-tab" data-status="5">已取消</button>
             </div>
             
             <div class="search-section">
@@ -330,6 +330,8 @@
         <!-- 订单列表 -->
         <div id="ordersContainer">
             <!-- 订单项目将通过JavaScript动态生成 -->
+
+
         </div>
         
         <!-- 空订单 -->
@@ -342,295 +344,375 @@
             </button>
         </div>
         
-        <!-- 分页 -->
-        <div class="pagination-wrapper">
-            <nav>
-                <ul class="pagination">
-                    <li class="disabled"><a href="#"><i class="fa fa-angle-left"></i></a></li>
-                    <li class="active"><a href="#">1</a></li>
-                    <li><a href="#">2</a></li>
-                    <li><a href="#">3</a></li>
-                    <li><a href="#"><i class="fa fa-angle-right"></i></a></li>
-                </ul>
-            </nav>
-        </div>
     </div>
     
     <!-- 引入通用页脚 -->
     <%@ include file="../common/footer.jsp" %>
     
     <script>
-        // 模拟订单数据
-        var orders = [
-            {
-                id: 'EM202401150001',
-                date: '2024-01-15 14:30:25',
-                status: 'delivered',
-                statusText: '已完成',
-                products: [
-                    {name: 'iPhone 14 Pro', specs: '深空黑色 128GB', quantity: 1, price: 7999, image: 'fa-mobile'},
-                    {name: 'AirPods Pro', specs: '第二代 主动降噪', quantity: 1, price: 1999, image: 'fa-headphones'}
-                ],
-                total: 9998
-            },
-            {
-                id: 'EM202401120002',
-                date: '2024-01-12 10:15:30',
-                status: 'shipped',
-                statusText: '待收货',
-                products: [
-                    {name: 'MacBook Pro', specs: '13英寸 M2芯片', quantity: 1, price: 12999, image: 'fa-laptop'}
-                ],
-                total: 12999
-            },
-            {
-                id: 'EM202401100003',
-                date: '2024-01-10 16:45:12',
-                status: 'paid',
-                statusText: '待发货',
-                products: [
-                    {name: 'iPad Pro', specs: '11英寸 256GB', quantity: 1, price: 6999, image: 'fa-tablet'},
-                    {name: 'Apple Pencil', specs: '第二代', quantity: 1, price: 999, image: 'fa-pencil'}
-                ],
-                total: 7998
-            },
-            {
-                id: 'EM202401080004',
-                date: '2024-01-08 09:20:45',
-                status: 'pending',
-                statusText: '待付款',
-                products: [
-                    {name: 'Apple Watch', specs: 'Series 9 45mm', quantity: 1, price: 2999, image: 'fa-clock-o'}
-                ],
-                total: 2999
-            },
-            {
-                id: 'EM202401050005',
-                date: '2024-01-05 13:10:20',
-                status: 'cancelled',
-                statusText: '已取消',
-                products: [
-                    {name: '智能电视', specs: '55英寸 4K', quantity: 1, price: 3999, image: 'fa-tv'}
-                ],
-                total: 3999
-            }
-        ];
+        let currentStatus = 'all';
+        let currentPage = 1;
+        let pageSize = 10;
         
-        var currentOrders = orders;
-        var currentStatus = 'all';
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+            initFilterTabs();
+        });
         
-        // 渲染订单列表
-        function renderOrders(orderList) {
-            var container = $('#ordersContainer');
-            container.empty();
-            
-            if (orderList.length === 0) {
-                $('#emptyOrders').show();
-                return;
-            }
-            
-            $('#emptyOrders').hide();
-            
-            orderList.forEach(function(order) {
-                var productsHtml = order.products.map(function(product) {
-                    return `
-                        <div class="product-row">
-                            <div class="product-image">
-                                <i class="fa ${product.image}"></i>
-                            </div>
-                            <div class="product-details">
-                                <div class="product-name">${product.name}</div>
-                                <div class="product-specs">${product.specs}</div>
-                            </div>
-                            <div class="product-quantity">×${product.quantity}</div>
-                            <div class="product-price">¥${product.price.toFixed(2)}</div>
-                        </div>
-                    `;
-                }).join('');
-                
-                var actionsHtml = getOrderActions(order.status);
-                
-                var orderHtml = `
-                    <div class="order-item">
-                        <div class="order-header">
-                            <div class="order-info">
-                                <div class="order-number">订单号：${order.id}</div>
-                                <div class="order-date">${order.date}</div>
-                            </div>
-                            <div class="order-status status-${order.status}">${order.statusText}</div>
-                        </div>
-                        <div class="order-content">
-                            <div class="order-products">
-                                ${productsHtml}
-                            </div>
-                            <div class="order-summary">
-                                <div class="order-total">订单总额：¥${order.total.toFixed(2)}</div>
-                                <div class="order-actions">
-                                    ${actionsHtml}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.append(orderHtml);
+        // 初始化筛选标签
+        function initFilterTabs() {
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            filterTabs.forEach(function(tab) {
+                tab.addEventListener('click', function() {
+                    // 移除所有active类
+                    filterTabs.forEach(function(t) {
+                        t.classList.remove('active');
+                    });
+                    // 给当前点击的标签添加active类
+                    this.classList.add('active');
+                    currentStatus = this.getAttribute('data-status');
+                    currentPage = 1;
+                    loadOrders();
+                });
             });
         }
         
-        // 获取订单操作按钮
-        function getOrderActions(status) {
-            switch (status) {
-                case 'pending':
-                    return `
-                        <button class="btn-action btn-primary" onclick="payOrder()">立即付款</button>
-                        <button class="btn-action" onclick="viewOrder()">查看详情</button>
-                        <button class="btn-action btn-danger" onclick="cancelOrder()">取消订单</button>
-                    `;
-                case 'paid':
-                    return `
-                        <button class="btn-action" onclick="viewOrder()">查看详情</button>
-                        <button class="btn-action" onclick="viewLogistics()">查看物流</button>
-                    `;
-                case 'shipped':
-                    return `
-                        <button class="btn-action btn-primary" onclick="confirmReceipt()">确认收货</button>
-                        <button class="btn-action" onclick="viewOrder()">查看详情</button>
-                        <button class="btn-action" onclick="viewLogistics()">查看物流</button>
-                    `;
-                case 'delivered':
-                    return `
-                        <button class="btn-action" onclick="viewOrder()">查看详情</button>
-                        <button class="btn-action" onclick="writeReview()">评价商品</button>
-                        <button class="btn-action" onclick="buyAgain()">再次购买</button>
-                    `;
-                case 'cancelled':
-                    return `
-                        <button class="btn-action" onclick="viewOrder()">查看详情</button>
-                        <button class="btn-action" onclick="buyAgain()">再次购买</button>
-                    `;
-                default:
-                    return `<button class="btn-action" onclick="viewOrder()">查看详情</button>`;
+        // 加载订单列表
+        function loadOrders() {
+            const requestData = {};
+            
+            // 如果不是查询全部订单，添加状态参数
+            if (currentStatus !== 'all') {
+                requestData.status = currentStatus;
+            }
+            
+            fetch('${ctx}/web/order/myOrders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    alert('请先登录');
+                    window.location.href = '${ctx}/web/login.jsp';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('订单数据:', data);
+                if (data && data.code === 0) {
+                    renderOrders(data.data);
+                } else {
+                    showError('获取订单失败：' + (data ? data.msg : '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('请求失败:', error);
+                showError('网络错误，请稍后重试');
+            });
+        }
+        
+        // 渲染订单列表
+        function renderOrders(orders) {
+            console.log('开始渲染订单，订单数量:', orders ? orders.length : 0);
+            const container = document.getElementById('ordersContainer');
+            const emptyDiv = document.getElementById('emptyOrders');
+            
+            if (!orders || orders.length === 0) {
+                console.log('没有订单数据，显示空状态');
+                container.innerHTML = '';
+                emptyDiv.style.display = 'block';
+                return;
+            }
+            
+            console.log('隐藏空状态，开始生成订单');
+            emptyDiv.style.display = 'none';
+            container.innerHTML = '';
+            
+            orders.forEach(function(order, index) {
+                console.log('处理第', index + 1, '个订单:', order.orderNum);
+                const orderElement = createOrderElement(order);
+                container.appendChild(orderElement);
+            });
+            
+            console.log('渲染完成');
+        }
+        
+        // 创建订单元素
+        function createOrderElement(order) {
+            console.log('创建订单元素:', order);
+            const statusClass = getStatusClass(order.orderStatus);
+            const statusText = getStatusText(order.orderStatus);
+            const orderDate = formatDate(order.createdTime);
+            
+            // 创建主容器
+            const orderItem = document.createElement('div');
+            orderItem.className = 'order-item';
+            
+            // 创建订单头部
+            const orderHeader = document.createElement('div');
+            orderHeader.className = 'order-header';
+            
+            const orderInfo = document.createElement('div');
+            orderInfo.className = 'order-info';
+            
+            const orderNumber = document.createElement('span');
+            orderNumber.className = 'order-number';
+            orderNumber.textContent = '订单号：' + (order.orderNum || 'N/A');
+            
+            const orderDateSpan = document.createElement('span');
+            orderDateSpan.className = 'order-date';
+            orderDateSpan.textContent = orderDate || '';
+            
+            orderInfo.appendChild(orderNumber);
+            orderInfo.appendChild(orderDateSpan);
+            
+            const orderStatus = document.createElement('span');
+            orderStatus.className = 'order-status ' + statusClass;
+            orderStatus.textContent = statusText;
+            
+            orderHeader.appendChild(orderInfo);
+            orderHeader.appendChild(orderStatus);
+            
+            // 创建订单内容
+            const orderContent = document.createElement('div');
+            orderContent.className = 'order-content';
+            
+            const orderProducts = document.createElement('div');
+            orderProducts.className = 'order-products';
+            
+            // 创建商品行
+            const productRow = document.createElement('div');
+            productRow.className = 'product-row';
+            
+            const productImage = document.createElement('div');
+            productImage.className = 'product-image';
+            const icon = document.createElement('i');
+            icon.className = 'fa fa-apple';
+            productImage.appendChild(icon);
+            
+            const productDetails = document.createElement('div');
+            productDetails.className = 'product-details';
+            
+            const productName = document.createElement('div');
+            productName.className = 'product-name';
+            productName.textContent = '订单商品';
+            
+            const productSpecs = document.createElement('div');
+            productSpecs.className = 'product-specs';
+            productSpecs.textContent = '详情请查看订单详情';
+            
+            productDetails.appendChild(productName);
+            productDetails.appendChild(productSpecs);
+            
+            const productQuantity = document.createElement('div');
+            productQuantity.className = 'product-quantity';
+            productQuantity.textContent = '-';
+            
+            const productPrice = document.createElement('div');
+            productPrice.className = 'product-price';
+            productPrice.textContent = '¥' + (order.paymentMoney || '0');
+            
+            productRow.appendChild(productImage);
+            productRow.appendChild(productDetails);
+            productRow.appendChild(productQuantity);
+            productRow.appendChild(productPrice);
+            
+            orderProducts.appendChild(productRow);
+            
+            // 创建订单汇总
+            const orderSummary = document.createElement('div');
+            orderSummary.className = 'order-summary';
+            
+            const orderTotal = document.createElement('div');
+            orderTotal.className = 'order-total';
+            orderTotal.textContent = '实付款：¥' + (order.paymentMoney || '0');
+            
+            const orderActions = document.createElement('div');
+            orderActions.className = 'order-actions';
+            
+            // 根据订单状态添加按钮
+            const orderId = order.id || order.orderId || order.orderNum;
+            if (order.orderStatus == 1) {
+                const payBtn = document.createElement('button');
+                payBtn.className = 'btn-action btn-primary';
+                payBtn.innerHTML = '<i class="fa fa-credit-card"></i> 立即付款';
+                payBtn.onclick = function() { payOrder(orderId); };
+                
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'btn-action';
+                cancelBtn.innerHTML = '<i class="fa fa-times"></i> 取消订单';
+                cancelBtn.onclick = function() { cancelOrder(orderId); };
+                
+                orderActions.appendChild(payBtn);
+                orderActions.appendChild(cancelBtn);
+            } else {
+                const viewBtn = document.createElement('button');
+                viewBtn.className = 'btn-action';
+                viewBtn.innerHTML = '<i class="fa fa-eye"></i> 查看详情';
+                viewBtn.onclick = function() { viewOrderDetail(orderId); };
+                orderActions.appendChild(viewBtn);
+            }
+            
+            orderSummary.appendChild(orderTotal);
+            orderSummary.appendChild(orderActions);
+            
+            orderContent.appendChild(orderProducts);
+            orderContent.appendChild(orderSummary);
+            
+            orderItem.appendChild(orderHeader);
+            orderItem.appendChild(orderContent);
+            
+            return orderItem;
+        }
+        
+
+        
+        // 获取状态样式类
+        function getStatusClass(status) {
+            switch(parseInt(status)) {
+                case 1: return 'status-pending';
+                case 2: return 'status-paid';
+                case 3: return 'status-shipped';
+                case 4: return 'status-delivered';
+                case 5: return 'status-cancelled';
+                default: return 'status-pending';
             }
         }
         
-        // 筛选订单
-        function filterOrders(status) {
-            currentStatus = status;
-            
-            if (status === 'all') {
-                currentOrders = orders;
-            } else {
-                currentOrders = orders.filter(order => order.status === status);
+        // 获取状态文本
+        function getStatusText(status) {
+            switch(parseInt(status)) {
+                case 1: return '待付款';
+                case 2: return '待发货';
+                case 3: return '待收货';
+                case 4: return '已完成';
+                case 5: return '已取消';
+                default: return '未知状态';
             }
-            
-            renderOrders(currentOrders);
+        }
+        
+        // 格式化日期
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            return date.getFullYear() + '-' + 
+                   String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                   String(date.getDate()).padStart(2, '0') + ' ' +
+                   String(date.getHours()).padStart(2, '0') + ':' + 
+                   String(date.getMinutes()).padStart(2, '0');
         }
         
         // 搜索订单
         function searchOrders() {
-            var keyword = $('#searchInput').val().trim().toLowerCase();
-            
-            if (!keyword) {
-                filterOrders(currentStatus);
-                return;
+            const keyword = $('#searchInput').val().trim();
+            if (keyword) {
+                // 这里可以添加搜索逻辑
+                alert('搜索功能开发中...');
+            } else {
+                loadOrders();
             }
-            
-            var filteredOrders = currentOrders.filter(function(order) {
-                // 搜索订单号
-                if (order.id.toLowerCase().includes(keyword)) {
-                    return true;
-                }
-                
-                // 搜索商品名称
-                return order.products.some(function(product) {
-                    return product.name.toLowerCase().includes(keyword);
+        }
+        
+        // 支付订单
+        function payOrder(orderId) {
+            if (confirm('确认支付此订单？')) {
+                $.ajax({
+                    url: '${ctx}/web/order/payOrder',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({orderId: orderId}),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('支付成功！');
+                            loadOrders();
+                        } else {
+                            alert('支付失败：' + response.msg);
+                        }
+                    },
+                    error: function() {
+                        alert('网络错误，请稍后重试');
+                    }
                 });
-            });
-            
-            renderOrders(filteredOrders);
-        }
-        
-        // 订单操作函数
-        function payOrder() {
-            showLoading('正在跳转到支付页面...');
-            setTimeout(function() {
-                hideLoading();
-                alert('跳转到支付页面（功能开发中）');
-            }, 1000);
-        }
-        
-        function viewOrder() {
-            alert('查看订单详情（功能开发中）');
-        }
-        
-        function cancelOrder() {
-            if (confirm('确定要取消这个订单吗？')) {
-                showLoading('正在取消订单...');
-                setTimeout(function() {
-                    hideLoading();
-                    alert('订单已取消');
-                    // 这里可以更新订单状态并重新渲染
-                }, 1000);
             }
         }
         
-        function viewLogistics() {
-            alert('查看物流信息（功能开发中）');
-        }
-        
-        function confirmReceipt() {
-            if (confirm('确认已收到商品吗？')) {
-                showLoading('正在确认收货...');
-                setTimeout(function() {
-                    hideLoading();
-                    alert('收货确认成功');
-                    // 这里可以更新订单状态并重新渲染
-                }, 1000);
+        // 取消订单
+        function cancelOrder(orderId) {
+            if (confirm('确认取消此订单？')) {
+                $.ajax({
+                    url: '${ctx}/web/order/cancelOrder',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({orderId: orderId}),
+                    success: function(response) {
+                        if (response.code === 200) {
+                            alert('订单已取消');
+                            loadOrders();
+                        } else {
+                            alert('取消失败：' + response.msg);
+                        }
+                    },
+                    error: function() {
+                        alert('网络错误，请稍后重试');
+                    }
+                });
             }
         }
         
-        function writeReview() {
-            alert('商品评价（功能开发中）');
+        // 确认收货
+        function confirmReceive(orderId) {
+            if (confirm('确认收货？')) {
+                $.ajax({
+                    url: '${ctx}/web/order/confirmReceive',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({orderId: orderId}),
+                    success: function(response) {
+                        if (response.code === 200) {
+                            alert('确认收货成功！');
+                            loadOrders();
+                        } else {
+                            alert('操作失败：' + response.msg);
+                        }
+                    },
+                    error: function() {
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            }
         }
         
-        function buyAgain() {
-            showLoading('正在添加到购物车...');
-            setTimeout(function() {
-                hideLoading();
-                alert('商品已添加到购物车');
-            }, 1000);
+        // 查看订单详情
+        function viewOrderDetail(orderId) {
+            // 这里可以跳转到订单详情页面或弹出详情窗口
+            alert('订单详情功能开发中...');
         }
         
+        // 再次购买
+        function buyAgain(orderId) {
+            alert('再次购买功能开发中...');
+        }
+        
+        // 去购物
         function goShopping() {
-            window.location.href = '${ctx}/web/products.jsp';
+            window.location.href = '${ctx}/web/index.jsp';
         }
         
-        // 页面加载完成后初始化
-        $(document).ready(function() {
-            <% if (session.getAttribute("loginName") == null) { %>
-                // 未登录用户重定向到登录页面
-                alert('请先登录后查看订单');
-                window.location.href = '${ctx}/login.jsp';
-                return;
-            <% } %>
-            
-            // 初始化订单列表
-            renderOrders(orders);
-            
-            // 筛选标签事件
-            $('.filter-tab').click(function() {
-                $('.filter-tab').removeClass('active');
-                $(this).addClass('active');
-                
-                var status = $(this).data('status');
-                filterOrders(status);
-            });
-            
-            // 搜索框回车事件
-            $('#searchInput').keypress(function(e) {
-                if (e.which === 13) {
-                    searchOrders();
-                }
-            });
+        // 显示错误信息
+        function showError(message) {
+            alert(message);
+        }
+        
+        // 回车搜索
+        $('#searchInput').keypress(function(e) {
+            if (e.which == 13) {
+                searchOrders();
+            }
         });
     </script>
 </body>

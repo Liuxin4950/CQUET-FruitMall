@@ -17,31 +17,31 @@
 <body class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content">
         <form class="form-horizontal m" id="form-student-add">
-            <div class="form-group">    
+            <div class="form-group">
                 <label class="col-sm-3 control-label is-required">姓名：</label>
                 <div class="col-sm-8">
                     <input name="name" class="form-control" type="text" required>
                 </div>
             </div>
-            <div class="form-group">    
+            <div class="form-group">
                 <label class="col-sm-3 control-label is-required">登录名：</label>
                 <div class="col-sm-8">
                     <input name="loginName" class="form-control" type="text" required>
                 </div>
             </div>
-            <div class="form-group">    
+            <div class="form-group">
                 <label class="col-sm-3 control-label">密码：</label>
                 <div class="col-sm-8">
                     <input name="password" class="form-control" type="password">
                 </div>
             </div>
-            <div class="form-group">    
+            <div class="form-group">
                 <label class="col-sm-3 control-label">联系电话：</label>
                 <div class="col-sm-8">
                     <input name="phone" class="form-control" type="text">
                 </div>
             </div>
-            <div class="form-group">    
+            <div class="form-group">
                 <label class="col-sm-3 control-label">电子邮箱：</label>
                 <div class="col-sm-8">
                     <input name="email" class="form-control" type="text">
@@ -68,6 +68,7 @@
     <script src="${ctx}/static/ajax/easy-ui/common.js?v=4.5.1"></script>
     <script src="${ctx}/static/ajax/easy-ui/easy-ui.js?v=4.5.1"></script>
     <script type="text/javascript">
+        console.log(ctx)
         var prefix = "/mall/user"
         $("#form-student-add").validate({
             focusCleanup: true

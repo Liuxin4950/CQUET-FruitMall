@@ -113,7 +113,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
         }
         try
         {
-            return parseDate(str.toString(), parsePatterns);
+            return org.apache.commons.lang3.time.DateUtils.parseDate(str.toString(), parsePatterns);
         }
         catch (ParseException e)
         {
