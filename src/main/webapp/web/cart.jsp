@@ -319,7 +319,7 @@
                         <h4><i class="fa fa-calculator"></i> 订单汇总</h4>
                         <div class="summary-row">
                             <span>商品总数：</span>
-                            <span id="totalItems">0件</span>
+                            <span id="totalItems">}件</span>
                         </div>
                         <div class="summary-row">
                             <span>商品总价：</span>
@@ -328,10 +328,6 @@
                         <div class="summary-row">
                             <span>运费：</span>
                             <span id="shipping">免费</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>优惠券：</span>
-                            <span id="discount">-¥0.00</span>
                         </div>
                         <div class="summary-row">
                             <span>应付总额：</span>
@@ -361,217 +357,388 @@
     
     <!-- 引入通用页脚 -->
     <%@ include file="../common/footer.jsp" %>
-    
+
     <script>
-        // 模拟购物车数据
-        var cartItems = [
-            {id: 1, name: 'iPhone 14 Pro', price: 7999, quantity: 1, image: 'fa-mobile', specs: '深空黑色 128GB', selected: true},
-            {id: 2, name: 'MacBook Pro', price: 12999, quantity: 1, image: 'fa-laptop', specs: '13英寸 M2芯片', selected: true},
-            {id: 3, name: 'AirPods Pro', price: 1999, quantity: 2, image: 'fa-headphones', specs: '第二代 主动降噪', selected: false}
-        ];
-        
-        // 渲染购物车
-        function renderCart() {
-            var container = $('#cartItems');
-            container.empty();
+        // 页面加载完成后获取购物车数据
+        $(document).ready(function() {
+            loadCartData();
+        });
+
+        // 获取购物车数据
+        function loadCartData() {
+            $.ajax({
+                url: '${ctx}/web/cart/list',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    console.log(response);
+                    if (response.code === 0) {
+                        renderCartData(response.data);
+                    } else {
+                        console.error('获取购物车数据失败:', response.msg);
+                        showEmptyCart();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('请求失败:', error);
+                    showEmptyCart();
+                }
+            });
+        }
+
+        // 渲染购物车数据
+        function renderCartData(data) {
+            const cartList = data.cartList;
+            const summary = data.summary;
             
-            if (cartItems.length === 0) {
-                $('#cartContent').hide();
-                $('#emptyCart').show();
+            if (!cartList || cartList.length === 0) {
+                showEmptyCart();
                 return;
             }
             
+            // 显示购物车内容，隐藏空购物车提示
             $('#cartContent').show();
             $('#emptyCart').hide();
             
-            cartItems.forEach(function(item, index) {
-                var itemHtml = `
-                    <tr data-id="${item.id}">
-                        <td>
-                            <input type="checkbox" class="item-checkbox" ${item.selected ? 'checked' : ''} 
-                                   onchange="toggleItemSelection(${item.id})">
-                        </td>
-                        <td>
-                            <div class="product-info">
-                                <div class="product-image">
-                                    <i class="fa ${item.image}"></i>
-                                </div>
-                                <div class="product-details">
-                                    <h5>${item.name}</h5>
-                                    <div class="product-specs">${item.specs}</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="price-cell">¥${item.price.toFixed(2)}</td>
-                        <td>
-                            <div class="quantity-controls">
-                                <button class="quantity-btn" onclick="decreaseQuantity(${item.id})">
-                                    <i class="fa fa-minus"></i>
-                                </button>
-                                <input type="number" class="quantity-input" value="${item.quantity}" 
-                                       min="1" max="10" onchange="updateQuantity(${item.id}, this.value)">
-                                <button class="quantity-btn" onclick="increaseQuantity(${item.id})">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </div>
-                        </td>
-                        <td class="price-cell">¥${(item.price * item.quantity).toFixed(2)}</td>
-                        <td>
-                            <i class="fa fa-trash remove-btn" onclick="removeItem(${item.id})" 
-                               title="删除商品"></i>
-                        </td>
-                    </tr>
-                `;
-                container.append(itemHtml);
-            });
+            // 渲染购物车项目
+            const cartItemsHtml = cartList.map(item => {
+                const productImage = item.productPic ? 
+                    '<img src="' + '${ctx}' + item.productPic + '" alt="' + item.productName + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">'
+                    : '<i class="fa fa-image"></i>';
+                
+                return '<tr data-id="' + item.id + '">' +
+                    '<td>' +
+                        '<input type="checkbox" class="item-checkbox" ' + (item.isSelected ? 'checked' : '') + ' ' +
+                               'onchange="updateItemSelection(' + item.id + ', this.checked)">' +
+                    '</td>' +
+                    '<td>' +
+                        '<div class="product-info">' +
+                            '<div class="product-image">' +
+                                productImage +
+                            '</div>' +
+                            '<div class="product-details">' +
+                                '<h5>' + item.productName + '</h5>' +
+                                '<div class="product-specs">' + (item.description || '新鲜水果，品质保证') + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td class="price-cell">¥' + item.price.toFixed(2) + '</td>' +
+                    '<td>' +
+                        '<div class="quantity-controls">' +
+                            '<button class="quantity-btn" onclick="updateQuantity(' + item.id + ', ' + (item.amount - 1) + ')">' +
+                                '<i class="fa fa-minus"></i>' +
+                            '</button>' +
+                            '<input type="text" class="quantity-input" value="' + item.amount + '" ' +
+                                   'onchange="updateQuantity(' + item.id + ', this.value)">' +
+                            '<button class="quantity-btn" onclick="updateQuantity(' + item.id + ', ' + (item.amount + 1) + ')">' +
+                                '<i class="fa fa-plus"></i>' +
+                            '</button>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td class="price-cell">¥' + item.subtotal + '</td>' +
+                    '<td>' +
+                        '<span class="remove-btn" onclick="removeItem(' + item.id + ')" title="删除">' +
+                            '<i class="fa fa-trash"></i>' +
+                        '</span>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
             
-            updateSummary();
-            updateSelectAll();
+            $('#cartItems').html(cartItemsHtml);
+            
+            // 更新汇总信息
+            updateSummary(summary);
+            
+            // 更新全选状态
+            updateSelectAllStatus();
         }
         
         // 更新汇总信息
-        function updateSummary() {
-            var selectedItems = cartItems.filter(item => item.selected);
-            var totalItems = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
-            var subtotal = selectedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            var shipping = subtotal >= 99 ? 0 : 10;
-            var discount = 0;
-            var totalAmount = subtotal + shipping - discount;
-            
-            $('#totalItems').text(totalItems + '件');
-            $('#subtotal').text('¥' + subtotal.toFixed(2));
-            $('#shipping').text(shipping === 0 ? '免费' : '¥' + shipping.toFixed(2));
-            $('#discount').text('-¥' + discount.toFixed(2));
-            $('#totalAmount').text('¥' + totalAmount.toFixed(2));
+        function updateSummary(summary) {
+            console.log(summary)
+            $('#totalItems').text(summary.cartSize + '件');
+            $('#subtotal').text('¥' + summary.totalAmount);
+            $('#totalAmount').text('¥' + summary.totalAmount);
+        }
+        
+        // 显示空购物车
+        function showEmptyCart() {
+            $('#cartContent').hide();
+            $('#emptyCart').show();
         }
         
         // 更新全选状态
-        function updateSelectAll() {
-            var allSelected = cartItems.length > 0 && cartItems.every(item => item.selected);
-            $('#selectAll').prop('checked', allSelected);
+        function updateSelectAllStatus() {
+            const checkboxes = $('.item-checkbox');
+            const checkedBoxes = $('.item-checkbox:checked');
+            $('#selectAll').prop('checked', checkboxes.length > 0 && checkboxes.length === checkedBoxes.length);
         }
         
-        // 切换商品选择状态
-        function toggleItemSelection(itemId) {
-            var item = cartItems.find(item => item.id === itemId);
-            if (item) {
-                item.selected = !item.selected;
-                updateSummary();
-                updateSelectAll();
+        // 更新商品选择状态
+        function updateItemSelection(itemId, isSelected) {
+            $.ajax({
+                url: '${ctx}/web/cart/select',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    cartId: itemId,
+                    selected: isSelected
+                }),
+                success: function(response) {
+                    if (response.code === 0) {
+                        // 更新成功，重新加载购物车数据以更新汇总信息
+                        loadCartData();
+                    } else {
+                        alert('更新失败：' + response.msg);
+                        // 恢复复选框状态
+                        $('tr[data-id="' + itemId + '"] .item-checkbox').prop('checked', !isSelected);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('更新选择状态失败:', error);
+                    alert('更新失败，请稍后重试');
+                    // 恢复复选框状态
+                    $('tr[data-id="' + itemId + '"] .item-checkbox').prop('checked', !isSelected);
+                }
+            });
+        }
+        
+        // 更新商品数量
+        function updateQuantity(itemId, newQuantity) {
+            // 验证和转换数量
+            if (!newQuantity || newQuantity === '') {
+                alert('请输入有效的商品数量');
+                loadCartData(); // 重新加载数据恢复原始值
+                return;
+            }
+            
+            const quantity = parseInt(newQuantity);
+            if (isNaN(quantity) || quantity < 1) {
+                alert('商品数量必须是大于0的整数');
+                loadCartData(); // 重新加载数据恢复原始值
+                return;
+            }
+            
+            $.ajax({
+                url: '${ctx}/web/cart/update',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    cartId: itemId,
+                    amount: quantity
+                }),
+                success: function(response) {
+                    console.log(response);
+                    
+                    if (response.code === 0) {
+                        // 更新成功，重新加载购物车数据
+                        loadCartData();
+                    } else {
+                        alert('更新失败：' + response.msg);
+                        // 重新加载数据以恢复原始数量
+                        loadCartData();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('更新数量失败:', error);
+                    alert('更新失败，请稍后重试');
+                    // 重新加载数据以恢复原始数量
+                    loadCartData();
+                }
+            });
+        }
+        
+        // 删除商品
+        function removeItem(itemId) {
+            if (confirm('确定要删除这个商品吗？')) {
+                $.ajax({
+                    url: '${ctx}/web/cart/delete',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        cartId: itemId
+                    }),
+                    success: function(response) {
+                        if (response.code === 0) {
+                            // 删除成功，重新加载购物车数据
+                            loadCartData();
+                        } else {
+                            alert('删除失败：' + response.msg);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('删除商品失败:', error);
+                        alert('删除商品失败，请稍后重试');
+                    }
+                });
             }
         }
         
         // 全选/取消全选
         $('#selectAll').change(function() {
-            var checked = $(this).is(':checked');
-            cartItems.forEach(item => item.selected = checked);
-            $('.item-checkbox').prop('checked', checked);
-            updateSummary();
+            const isChecked = $(this).is(':checked');
+            
+            $.ajax({
+                url: '${ctx}/web/cart/selectAll',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    selected: isChecked
+                }),
+                success: function(response) {
+                    if (response.code === 0) {
+                        // 更新成功，重新加载购物车数据
+                        loadCartData();
+                    } else {
+                        alert('更新失败：' + response.msg);
+                        // 恢复全选框状态
+                        $('#selectAll').prop('checked', !isChecked);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('全选操作失败:', error);
+                    alert('操作失败，请稍后重试');
+                    // 恢复全选框状态
+                    $('#selectAll').prop('checked', !isChecked);
+                }
+            });
         });
         
-        // 增加数量
-        function increaseQuantity(itemId) {
-            var item = cartItems.find(item => item.id === itemId);
-            if (item && item.quantity < 10) {
-                item.quantity++;
-                renderCart();
-            }
+        // 继续购物
+        function continueShopping() {
+            // 跳转到商品列表页面
+            window.location.href = '${ctx}/web/category.jsp';
         }
         
-        // 减少数量
-        function decreaseQuantity(itemId) {
-            var item = cartItems.find(item => item.id === itemId);
-            if (item && item.quantity > 1) {
-                item.quantity--;
-                renderCart();
+        // 结算
+        function checkout() {
+            const selectedItems = $('.item-checkbox:checked');
+            if (selectedItems.length === 0) {
+                alert('请先选择要结算的商品');
+                return;
             }
-        }
-        
-        // 更新数量
-        function updateQuantity(itemId, newQuantity) {
-            var quantity = parseInt(newQuantity);
-            if (quantity >= 1 && quantity <= 10) {
-                var item = cartItems.find(item => item.id === itemId);
-                if (item) {
-                    item.quantity = quantity;
-                    updateSummary();
-                }
-            } else {
-                renderCart(); // 重新渲染以恢复原值
-            }
-        }
-        
-        // 删除商品
-        function removeItem(itemId) {
-            if (confirm('确定要删除这件商品吗？')) {
-                cartItems = cartItems.filter(item => item.id !== itemId);
-                renderCart();
+            
+            // 获取选中商品的ID列表和数量信息
+            const selectedIds = [];
+            let totalAmount = 0;
+            let totalQuantity = 0;
+            
+            selectedItems.each(function() {
+                const row = $(this).closest('tr');
+                const cartId = row.data('id');
+                const quantity = parseInt(row.find('.quantity-input').val());
+                const price = parseFloat(row.find('.price-cell').first().text().replace('¥', ''));
+                
+                selectedIds.push(cartId);
+                totalQuantity += quantity;
+                totalAmount += price * quantity;
+            });
+            
+            console.log('selectedIds:', selectedIds);
+            console.log('totalQuantity:', totalQuantity);
+            console.log('totalAmount:', totalAmount);
+            
+            // 确认下单
+            if (confirm(`确认下单？\n商品数量：`+totalQuantity+`件\n总金额：￥`+totalAmount)) {
+                // 调用后端接口创建订单
+                $.ajax({
+                    url: '${ctx}/web/order/createOrderFromCart',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        cartIds: selectedIds.join(',')
+                    }),
+                    success: function(response) {
+                        console.log('创建订单响应:', response);
+                        if (response.code === 0) {
+                            alert('订单创建成功！订单号：' + response.data);
+                            // 刷新购物车页面
+                            location.reload();
+                        } else {
+                            alert('订单创建失败：' + response.msg);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('创建订单失败:', error);
+                        alert('网络错误，请稍后重试');
+                    }
+                });
             }
         }
         
         // 删除选中商品
         function clearSelected() {
-            var selectedItems = cartItems.filter(item => item.selected);
+            const selectedItems = $('.item-checkbox:checked');
             if (selectedItems.length === 0) {
                 alert('请先选择要删除的商品');
                 return;
             }
             
             if (confirm('确定要删除选中的商品吗？')) {
-                cartItems = cartItems.filter(item => !item.selected);
-                renderCart();
+                // 获取选中商品的ID列表
+                const selectedIds = [];
+                selectedItems.each(function() {
+                    const cartId = $(this).closest('tr').data('id');
+                    selectedIds.push(cartId);
+                });
+                
+                // 逐个删除选中的商品
+                let deleteCount = 0;
+                let totalCount = selectedIds.length;
+                
+                selectedIds.forEach(function(cartId) {
+                    $.ajax({
+                        url: '${ctx}/web/cart/delete',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            cartId: cartId
+                        }),
+                        success: function(response) {
+                            deleteCount++;
+                            if (deleteCount === totalCount) {
+                                // 所有删除操作完成
+                                alert('选中商品已删除');
+                                loadCartData();
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('删除商品失败:', error);
+                            deleteCount++;
+                            if (deleteCount === totalCount) {
+                                alert('部分商品删除失败，请刷新页面查看');
+                                loadCartData();
+                            }
+                        }
+                    });
+                });
             }
         }
         
         // 清空购物车
         function clearCart() {
-            if (cartItems.length === 0) {
-                alert('购物车已经是空的了');
-                return;
-            }
-            
             if (confirm('确定要清空购物车吗？')) {
-                cartItems = [];
-                renderCart();
+                $.ajax({
+                    url: '${ctx}/web/cart/clear',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.code === 0) {
+                            alert('购物车已清空');
+                            loadCartData();
+                        } else {
+                            alert('清空失败：' + response.msg);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('清空购物车失败:', error);
+                        alert('清空失败，请稍后重试');
+                    }
+                });
             }
         }
-        
-        // 继续购物
-        function continueShopping() {
-            window.location.href = '${ctx}/web/products.jsp';
-        }
-        
-        // 结算
-        function checkout() {
-            <% if (session.getAttribute("loginName") != null) { %>
-                var selectedItems = cartItems.filter(item => item.selected);
-                if (selectedItems.length === 0) {
-                    alert('请选择要结算的商品');
-                    return;
-                }
-                
-                showLoading('正在跳转到结算页面...');
-                
-                // 模拟跳转到结算页面
-                setTimeout(function() {
-                    hideLoading();
-                    alert('跳转到结算页面（功能开发中）');
-                }, 1500);
-            <% } else { %>
-                alert('请先登录后再进行结算');
-                window.location.href = '${ctx}/login.jsp';
-            <% } %>
-        }
-        
-        // 页面加载完成后初始化
-        $(document).ready(function() {
-            <% if (session.getAttribute("loginName") == null) { %>
-                // 未登录用户显示空购物车
-                cartItems = [];
-            <% } %>
-            
-            renderCart();
-        });
+
+
     </script>
 </body>
 </html>

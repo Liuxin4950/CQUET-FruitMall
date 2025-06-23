@@ -2,11 +2,11 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <title>登录EmarketMall系统</title>
-    <meta name="description" content="EmarketMall系统">
+    <title>登录向日葵水果商城</title>
+    <meta name="description" content="向日葵水果商城">
     <!-- 引入统一资源管理 -->
     <%@ include file="common/resources.jsp" %>
-    <link href="${ctx}/static/css/login.min.css" rel="stylesheet"/>
+    <link href="${ctx}/static/css/fruit-login.css" rel="stylesheet"/>
 
     <script>
         if (window.top !== window.self) {
@@ -15,40 +15,42 @@
         }
     </script>
 </head>
-<body class="signin">
-<div class="signinpanel">
+<body class="fruit-signin">
+<div class="fruit-signinpanel">
     <div class="row">
         <div class="col-sm-7">
-            <div class="signin-info">
+            <div class="fruit-signin-info">
                 <div class="m-b"></div>
-                <h4>欢迎使用 <strong>后台管理系统</strong></h4>
+                <h4>欢迎来到 <strong class="brand-name">向日葵</strong> 水果商城</h4>
                 <ul class="m-b">
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> SpringBoot</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Mybatis</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Shiro</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Thymeleaf</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Bootstrap</li>
+                    <li>新鲜水果，每日直达</li>
+                    <li>品质保证，源头直供</li>
+                    <li>营养健康，美味生活</li>
+                    <li>便捷购物，贴心服务</li>
+                    <li>绿色环保，自然之选</li>
                 </ul>
-                <strong>还没有账号？<a href="${ctx}/register.jsp">立即注册&raquo;</a></strong>
+                <strong>还没有账号？<a href="${ctx}/register.jsp">立即注册，享受新鲜&raquo;</a></strong>
             </div>
         </div>
         <div class="col-sm-5">
-            <form id="signupForm" autocomplete="off" >
-                <h4 class="no-margins">登录：</h4>
-                <p class="m-t-md">When we let go of something, it opens up a little space to grow.<br/>学会放手的同时也学会成长。</p>
-                <input type="text" name="loginName" class="form-control uname" placeholder="用户名" value="san"/>
-                <input type="password" name="password" class="form-control pword" placeholder="密码" value="123456"/>
-                <br/>
-                <div class="checkbox-custom">
-                    <input type="checkbox" id="rememberme" name="rememberme"> <label for="rememberme">记住我</label>
-                </div>
-                <button class="btn btn-success btn-block" id="btnSubmit" onclick="login()" data-loading="正在验证登录，请稍后...">登录</button>
-            </form>
+            <div class="fruit-form-container">
+                <form id="signupForm" autocomplete="off" >
+                    <h4 class="no-margins">用户登录</h4>
+                    <p class="m-t-md">🌻 享受新鲜水果，品味健康生活 🌻</p>
+                    <input type="text" name="loginName" class="fruit-form-control uname" placeholder="请输入用户名" value="san"/>
+                    <input type="password" name="password" class="fruit-form-control pword" placeholder="请输入密码" value="123456"/>
+                    <br/>
+                    <div class="fruit-checkbox">
+                        <input type="checkbox" id="rememberme" name="rememberme"> <label for="rememberme">记住我的登录状态</label>
+                    </div>
+                    <button class="fruit-btn" id="btnSubmit" onclick="login()" data-loading="正在验证登录，请稍后...">立即登录</button>
+                </form>
+            </div>
         </div>
     </div>
-    <div class="signup-footer">
+    <div class="fruit-footer">
         <div class="pull-left">
-            &copy; 2022 All Rights Reserved. <br>
+            &copy; 2024 向日葵水果商城 All Rights Reserved. <br>
         </div>
     </div>
 </div>

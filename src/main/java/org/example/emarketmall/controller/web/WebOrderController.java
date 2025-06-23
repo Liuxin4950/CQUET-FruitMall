@@ -6,8 +6,10 @@ import org.example.emarketmall.entity.*;
 import org.example.emarketmall.resl.OrdersResl;
 import org.example.emarketmall.service.OrdersService;
 import org.example.emarketmall.service.ProductInfoService;
+import org.example.emarketmall.service.OrderCartService;
 import org.example.emarketmall.service.impl.OrdersServiceImpl;
 import org.example.emarketmall.service.impl.ProductInfoServiceImpl;
+import org.example.emarketmall.service.impl.OrderCartServiceImpl;
 import org.example.emarketmall.utils.ServletUtils;
 import org.example.emarketmall.utils.StringUtils;
 import org.example.emarketmall.utils.DateUtils;
@@ -33,6 +35,7 @@ import java.util.UUID;
 public class WebOrderController extends HttpServlet {
     private OrdersService ordersService = new OrdersServiceImpl();
     private ProductInfoService productInfoService = new ProductInfoServiceImpl();
+    private OrderCartService orderCartService = new OrderCartServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -73,6 +76,9 @@ public class WebOrderController extends HttpServlet {
             case "/createOrder":
                 createUserOrder(req, resp, userInfo.getId());
                 break;
+            case "/createOrderFromCart":
+                createOrderFromCart(req, resp, userInfo.getId());
+                break;
             case "/cancelOrder":
                 cancelUserOrder(req, resp, userInfo.getId());
                 break;
@@ -112,6 +118,7 @@ public class WebOrderController extends HttpServlet {
                     }
                 }
             } else {
+                System.out.println("查询所有订单");
                 // 查询用户所有订单
                 orderList = ordersService.selectOrdersByUserId(userId);
             }
@@ -156,6 +163,130 @@ public class WebOrderController extends HttpServlet {
     }
 
     /**
+     * 从购物车创建订单（批量下单）
+     */
+    private void createOrderFromCart(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws IOException {
+        try {
+            HttpSession session = req.getSession();
+            UserInfo userInfo = (UserInfo) session.getAttribute("userInfo");
+            if (userInfo == null) {
+                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("用户未登录")));
+                return;
+            }
+            // 获取购物车ID列表和用户默认地址
+            String cartIdsStr = ServletUtils.getParamFromPayLoad(req, "cartIds");
+            String address = userInfo.getAddress(); // 获取用户默认地址
+            String shippingUser = userInfo.getLoginName(); // 获取收货人姓名
+            
+            System.out.println("购物车批量下单，cartIds：" + cartIdsStr);
+            
+            if (StringUtils.isEmpty(cartIdsStr)) {
+                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("请选择要下单的商品")));
+                return;
+            }
+            
+            if (StringUtils.isEmpty(address)) {
+                address = "默认地址";
+            }
+            if (StringUtils.isEmpty(shippingUser)) {
+                shippingUser = userInfo.getLoginName();
+            }
+            
+            // 解析购物车ID数组
+            String[] cartIdArray = cartIdsStr.split(",");
+            List<OrderCart> selectedCarts = new ArrayList<>();
+            
+            // 获取选中的购物车商品
+            for (String cartIdStr : cartIdArray) {
+                try {
+                    Integer cartId = Integer.parseInt(cartIdStr.trim());
+                    OrderCart cart = orderCartService.selectOrderCartById(cartId);
+                    if (cart != null && cart.getUserId().equals(userId)) {
+                        selectedCarts.add(cart);
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("无效的购物车ID：" + cartIdStr);
+                }
+            }
+            
+            if (selectedCarts.isEmpty()) {
+                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("没有找到有效的购物车商品")));
+                return;
+            }
+            
+            // 验证库存并计算总金额
+            BigDecimal totalAmount = BigDecimal.ZERO;
+            List<OrderDetail> orderDetails = new ArrayList<>();
+            
+            for (OrderCart cart : selectedCarts) {
+                // 查询商品信息验证库存
+                ProductInfo product = productInfoService.selectProductInfoById(Integer.parseInt(cart.getProductId()));
+                if (product == null) {
+                    ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("商品不存在：" + cart.getProductName())));
+                    return;
+                }
+                
+                if (product.getStock() < cart.getAmount()) {
+                    ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("商品库存不足：" + cart.getProductName() + "，当前库存：" + product.getStock())));
+                    return;
+                }
+                
+                // 创建订单详情
+                OrderDetail detail = new OrderDetail();
+                detail.setProductId(Integer.parseInt(cart.getProductId()));
+                detail.setProductName(cart.getProductName());
+                detail.setAmount(cart.getAmount());
+                detail.setProductPrice(cart.getPrice());
+                detail.setCreatedBy("user");
+                detail.setCreatedTime(DateUtils.getTime());
+                detail.setUpdatedTime(DateUtils.getTime());
+                orderDetails.add(detail);
+                
+                // 累计金额
+                totalAmount = totalAmount.add(cart.getPrice().multiply(new BigDecimal(cart.getAmount())));
+            }
+            
+            // 创建订单
+            Orders order = new Orders();
+            order.setOrderNum(generateOrderNum());
+            order.setUserId(userId);
+            order.setShippingUser(shippingUser);
+            order.setAddress(address);
+            order.setPaymentMethod(1); // 默认支付宝
+            order.setOrderStatus(1); // 待支付
+            order.setCreatedBy("user");
+            order.setCreatedTime(DateUtils.getTime());
+            order.setUpdatedTime(DateUtils.getTime());
+            order.setRemark("购物车批量下单");
+            
+            // 计算订单金额
+            BigDecimal shippingMoney = calculateShippingFee(totalAmount);
+            BigDecimal districtMoney = BigDecimal.ZERO;
+            
+            order.setOrderMoney(totalAmount);
+            order.setPaymentMoney(totalAmount.add(shippingMoney).subtract(districtMoney));
+            order.setShippingMoney(shippingMoney);
+            order.setDistrictMoney(districtMoney);
+            order.setOrderDetails(orderDetails);
+            
+            // 保存订单
+            boolean result = ordersService.createOrder(order);
+            if (result) {
+                // 删除购物车中的商品
+                for (OrderCart cart : selectedCarts) {
+                    orderCartService.deleteOrderCartById(cart.getId());
+                }
+                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.success("订单创建成功", order.getOrderNum())));
+            } else {
+                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("订单创建失败")));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("系统异常：" + e.getMessage())));
+        }
+    }
+
+    /**
      * 创建用户订单（简化版）
      */
     private void createUserOrder(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws IOException {
@@ -168,10 +299,11 @@ public class WebOrderController extends HttpServlet {
             }
             System.out.println("当前用户ID：" + userInfo.getLoginName());
             String productIdStr = ServletUtils.getParamFromPayLoad(req, "productId");
-            String amountStr = "1";
-            String address = "默认地址";
+            String quantityStr = ServletUtils.getParamFromPayLoad(req, "quantity");
+            String amountStr = StringUtils.isEmpty(quantityStr) ? "1" : quantityStr; // 支持quantity参数，默认为1
+            String address = userInfo.getAddress(); // 获取用户默认地址
             String shippingUser = userInfo.getLoginName();
-            System.out.println("购买的商品id："+productIdStr);
+            System.out.println("购买的商品id：" + productIdStr + ", 数量：" + amountStr);
             if (StringUtils.isEmpty(productIdStr) || StringUtils.isEmpty(amountStr)) {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("商品ID和数量不能为空")));
                 return;
@@ -225,7 +357,7 @@ public class WebOrderController extends HttpServlet {
     private void cancelUserOrder(HttpServletRequest req, HttpServletResponse resp, Integer userId) throws IOException {
         try {
             String orderIdStr = ServletUtils.getParamFromPayLoad(req, "orderId");
-            
+            System.out.println("取消订单，订单ID：" + orderIdStr);
             if (StringUtils.isEmpty(orderIdStr)) {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("订单ID不能为空")));
                 return;
@@ -241,12 +373,15 @@ public class WebOrderController extends HttpServlet {
             
             // 验证订单状态
             OrdersResl order = ordersService.selectOrdersById(orderId);
+            System.out.println("取消订单，订单ID：" + orderId + ", 用户ID：" + order.getUserId());
             if (order.getOrderStatus() != 1) {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("只有待支付状态的订单才能取消")));
                 return;
             }
-            
+
+            System.out.println("触发取消订单");
             boolean result = ordersService.cancelOrder(orderId);
+            System.out.println("kzq取消订单结果：" + result);
             if (result) {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.success("订单取消成功")));
             } else {

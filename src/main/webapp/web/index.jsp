@@ -331,6 +331,18 @@
         <div class="section">
             <h2 class="section-title">水果分类</h2>
             <div class="category-grid">
+                <div class="category-item" data-category="apple" onclick="location.href='${ctx}/web/category.jsp?type=apple'">
+                    <div class="category-icon">
+                        <i class="fa fa-apple" style="color: #e74c3c;"></i>
+                    </div>
+                    <h4>苹果类</h4>
+                </div>
+                <div class="category-item" data-category="banana" onclick="location.href='${ctx}/web/category.jsp?type=banana'">
+                    <div class="category-icon">
+                        <i class="fa fa-moon-o" style="color: #f1c40f;"></i>
+                    </div>
+                    <h4>香蕉类</h4>
+                </div>
                 <div class="category-item" data-category="citrus" onclick="location.href='${ctx}/web/category.jsp?type=citrus'">
                     <div class="category-icon">
                         <i class="fa fa-circle-o" style="color: #f39c12;"></i>
@@ -343,30 +355,24 @@
                     </div>
                     <h4>浆果类</h4>
                 </div>
-                <div class="category-item" data-category="tropical" onclick="location.href='${ctx}/web/category.jsp?type=tropical'">
+                <div class="category-item" data-category="tropical" onclick="location.href='${ctx}/web/category.jsp'">
                     <div class="category-icon">
                         <i class="fa fa-sun-o" style="color: #e67e22;"></i>
                     </div>
-                    <h4>热带水果</h4>
+                    <h4>全部商品</h4>
                 </div>
-                <div class="category-item" data-category="stone" onclick="location.href='${ctx}/web/category.jsp?type=stone'">
-                    <div class="category-icon">
-                        <i class="fa fa-heart" style="color: #e74c3c;"></i>
-                    </div>
-                    <h4>核果类</h4>
-                </div>
-                <div class="category-item" data-category="melon" onclick="location.href='${ctx}/web/category.jsp?type=melon'">
-                    <div class="category-icon">
-                        <i class="fa fa-circle" style="color: #27ae60;"></i>
-                    </div>
-                    <h4>瓜果类</h4>
-                </div>
-                <div class="category-item" data-category="gift" onclick="location.href='${ctx}/web/gift.jsp'">
-                    <div class="category-icon">
-                        <i class="fa fa-gift" style="color: #9b59b6;"></i>
-                    </div>
-                    <h4>礼品装</h4>
-                </div>
+<%--                <div class="category-item" data-category="stone" onclick="location.href='${ctx}/web/category.jsp?type=stone'">--%>
+<%--                    <div class="category-icon">--%>
+<%--                        <i class="fa fa-heart" style="color: #e74c3c;"></i>--%>
+<%--                    </div>--%>
+<%--                    <h4>核果类</h4>--%>
+<%--                </div>--%>
+<%--                <div class="category-item" data-category="melon" onclick="location.href='${ctx}/web/category.jsp?type=melon'">--%>
+<%--                    <div class="category-icon">--%>
+<%--                        <i class="fa fa-circle" style="color: #27ae60;"></i>--%>
+<%--                    </div>--%>
+<%--                    <h4>瓜果类</h4>--%>
+<%--                </div>--%>
             </div>
         </div>
     </div>
@@ -442,20 +448,21 @@
                     showLoading('正在添加到购物车...');
                 }
                 $.ajax({
-                    url: '${ctx}/cart/add',
+                    url: '${ctx}/web/cart/add',
                     type: 'POST',
                     data: {
                         productId: productId,
-                        quantity: 1
+                        amount: "1"
                     },
                     success: function(response) {
+                        console.log(response);
                         if (typeof hideLoading === 'function') {
                             hideLoading();
                         }
-                        if (response.success) {
+                        if (response.code === 0) {
                             alert('商品已成功加入购物车！');
                         } else {
-                            alert('添加失败：' + response.message);
+                            alert('添加失败：' + response.msg);
                         }
                     },
                     error: function() {
@@ -509,7 +516,7 @@
 
         // 查看更多商品
         function viewAllProducts() {
-            window.location.href = '${ctx}/web/products.jsp';
+            window.location.href = '${ctx}/web/category.jsp';
         }
 
         // 加载热门商品
@@ -519,7 +526,7 @@
                 type: 'GET',
                 data: {
                     opt: 'hot',
-                    limit: 8
+                    limit: 9
                 },
                 success: function(res) {
                     console.log(res)
@@ -542,7 +549,7 @@
                 type: 'GET',
                 data: {
                     opt: 'recommended',
-                    limit: 8
+                    limit: 9
                 },
                 success: function(response) {
                     if (response.code === 0 && response.data) {
@@ -562,7 +569,7 @@
             var container = $('#' + containerId);
             if (!container.length) {
                 console.error('容器不存在:', containerId);
-                return;
+                return;  
             }
             
             container.empty();
@@ -597,6 +604,7 @@
             var originPlace = product.originPlace || '未知产地';
             var isOrganic = product.isOrganic ? '有机' : '';
             var isSeasonal = product.isSeasonal ? '时令' : '';
+
             
             // 生成星级评分
             var starsHtml = '';
@@ -710,12 +718,15 @@
         
         // 显示商品详情模态框
         function showProductDetailModal(product) {
+            var rating = product.rating ? parseFloat(product.rating) : 0;
+            var starsHtml = generateStarsHTML(rating);
+            
             var modalHtml = '<div class="modal fade" id="productDetailModal" tabindex="-1">' +
                            '<div class="modal-dialog modal-lg">' +
                            '<div class="modal-content">' +
                            '<div class="modal-header">' +
                            '<button type="button" class="close" data-dismiss="modal">&times;</button>' +
-                           '<h4 class="modal-title">' + product.productName + '</h4>' +
+                           '<h4 class="modal-title">' + (product.productName || '商品详情') + '</h4>' +
                            '</div>' +
                            '<div class="modal-body">' +
                            '<div class="row">' +
@@ -726,10 +737,13 @@
                            ) +
                            '</div>' +
                            '<div class="col-md-6">' +
-                           '<h3 style="color: #e74c3c;">¥' + parseFloat(product.price).toFixed(2) + (product.weightUnit || '/斤') + '</h3>' +
+                           '<h3 style="color: #e74c3c;">¥' + parseFloat(product.price || 0).toFixed(2) + (product.weightUnit || '/份') + '</h3>' +
+                           '<div style="margin-bottom: 15px;">' +
+                           '<span class="stars" style="color: #f39c12; margin-right: 5px;">' + starsHtml + '</span>' +
+                           '<span>' + rating.toFixed(1) + ' 分</span>' +
+                           '</div>' +
                            '<p><strong>商品编码:</strong> ' + (product.productCode || '无') + '</p>' +
                            '<p><strong>产地:</strong> ' + (product.originPlace || '未知') + '</p>' +
-                           '<p><strong>评分:</strong> ' + (product.rating || '0.0') + ' 分</p>' +
                            '<p><strong>销量:</strong> ' + (product.salesCount || 0) + ' 件</p>' +
                            '<p><strong>库存:</strong> ' + (product.stock || 0) + ' 件</p>' +
                            '<p><strong>保质期:</strong> ' + (product.shelfLife || '未知') + ' 天</p>' +
@@ -737,8 +751,23 @@
                            '<p><strong>营养信息:</strong> ' + (product.nutritionInfo || '无') + '</p>' +
                            '<p><strong>商品描述:</strong> ' + (product.description || '暂无描述') + '</p>' +
                            '<div style="margin-top: 20px;">' +
-                           '<button class="btn btn-primary btn-lg" onclick="addToCart(' + product.id + '); $(\"#productDetailModal\").modal(\"hide\");">' +
-                           '<i class="fa fa-cart-plus" onclick="addToCart(' + product.id + ')"></i> 加入购物车' +
+                           '<div class="form-group" style="margin-bottom: 15px;">' +
+                           '<label for="productQuantity"><strong>购买数量:</strong></label>' +
+                           '<div class="input-group" style="width: 150px;">' +
+                           '<span class="input-group-btn">' +
+                           '<button class="btn btn-default" type="button" onclick="decreaseQuantity()"><i class="fa fa-minus"></i></button>' +
+                           '</span>' +
+                           '<input type="number" id="productQuantity" class="form-control text-center" value="1" min="1" max="' + (product.stock || 999) + '" style="width: 80px;">' +
+                           '<span class="input-group-btn">' +
+                           '<button class="btn btn-default" type="button" onclick="increaseQuantity(' + (product.stock || 999) + ')"><i class="fa fa-plus"></i></button>' +
+                           '</span>' +
+                           '</div>' +
+                           '</div>' +
+                           '<button class="btn btn-success btn-lg" onclick="addToCartWithQuantity(' + product.id + ');" style="margin-right: 10px;">' +
+                           '<i class="fa fa-cart-plus"></i> 加入购物车' +
+                           '</button>' +
+                           '<button class="btn btn-danger btn-lg" onclick="buyNowWithQuantity(' + product.id + ')">' +
+                           '<i class="fa fa-shopping-cart"></i> 立即购买' +
                            '</button>' +
                            '</div>' +
                            '</div>' +
@@ -754,6 +783,145 @@
             // 添加新的模态框并显示
             $('body').append(modalHtml);
             $('#productDetailModal').modal('show');
+        }
+
+        // 生成星级评分HTML
+        function generateStarsHTML(rating) {
+            var starsHtml = '';
+            var fullStars = Math.floor(rating);
+            var hasHalfStar = (rating - fullStars) >= 0.5;
+            
+            for (var i = 0; i < fullStars; i++) {
+                starsHtml += '<i class="fa fa-star"></i>';
+            }
+            if (hasHalfStar) {
+                starsHtml += '<i class="fa fa-star-half-o"></i>';
+            }
+            for (var i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
+                starsHtml += '<i class="fa fa-star-o"></i>';
+            }
+            
+            return starsHtml;
+        }
+        
+        // 增加数量
+        function increaseQuantity(maxStock) {
+            var quantityInput = document.getElementById('productQuantity');
+            if (quantityInput) {
+                var currentValue = parseInt(quantityInput.value) || 1;
+                if (currentValue < maxStock) {
+                    quantityInput.value = currentValue + 1;
+                } else {
+                    alert('库存不足，最大可购买数量为：' + maxStock);
+                }
+            }
+        }
+        
+        // 减少数量
+        function decreaseQuantity() {
+            var quantityInput = document.getElementById('productQuantity');
+            if (quantityInput) {
+                var currentValue = parseInt(quantityInput.value) || 1;
+                if (currentValue > 1) {
+                    quantityInput.value = currentValue - 1;
+                }
+            }
+        }
+        
+        // 带数量的加入购物车
+        function addToCartWithQuantity(productId) {
+            var quantityInput = document.getElementById('productQuantity');
+            var quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+            
+            // 验证数量
+            if (quantity < 1) {
+                alert('购买数量不能小于1');
+                return;
+            }
+            
+            <% if (session.getAttribute("loginName") != null) { %>
+                if (typeof showLoading === 'function') {
+                    showLoading('正在添加到购物车...');
+                }
+                $.ajax({
+                    url: '${ctx}/web/cart/add',
+                    type: 'POST',
+                    data: {
+                        productId: productId,
+                        amount: quantity.toString()
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        if (typeof hideLoading === 'function') {
+                            hideLoading();
+                        }
+                        if (response.code === 0) {
+                            alert('商品已成功加入购物车！');
+                            $('#productDetailModal').modal('hide');
+                        } else {
+                            alert('添加失败：' + response.msg);
+                        }
+                    },
+                    error: function() {
+                        if (typeof hideLoading === 'function') {
+                            hideLoading();
+                        }
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            <% } else { %>
+                alert('请先登录后再购买商品');
+                window.location.href = '${ctx}/login.jsp';
+            <% } %>
+        }
+        
+        // 带数量的立即购买
+        function buyNowWithQuantity(productId) {
+            var quantityInput = document.getElementById('productQuantity');
+            var quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
+            
+            // 验证数量
+            if (quantity < 1) {
+                alert('购买数量不能小于1');
+                return;
+            }
+            
+            <% if (session.getAttribute("loginName") != null) { %>
+                if (typeof showLoading === 'function') {
+                    showLoading('正在创建订单...');
+                }
+                $.ajax({
+                    url: '${ctx}/web/order/createOrder',
+                    type: 'POST',
+                    data: {
+                        productId: productId,
+                        quantity: quantity
+                    },
+                    success: function(response) {
+                        if (typeof hideLoading === 'function') {
+                            hideLoading();
+                        }
+                        if (response.code === 0) {
+                            alert('购买成功！订单号：' + response.data);
+                            $('#productDetailModal').modal('hide');
+                            // 可以跳转到订单详情页面
+                            // window.location.href = '${ctx}/web/order-detail.jsp?orderNum=' + response.data;
+                        } else {
+                            alert('订单创建失败：' + response.msg);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        if (typeof hideLoading === 'function') {
+                            hideLoading();
+                        }
+                        console.error('创建订单出错:', error);
+                        alert('网络错误，请稍后重试');
+                    }
+                });
+            <% } else { %>
+                alert('请先登录后再购买商品');
+                window.location.href = '${ctx}/login.jsp';
+            <% } %>
         }
 
         // 页面加载完成后初始化

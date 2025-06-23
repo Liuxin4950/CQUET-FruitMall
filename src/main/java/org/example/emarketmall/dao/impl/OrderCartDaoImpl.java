@@ -92,24 +92,33 @@ public class OrderCartDaoImpl implements OrderCartDao {
 
     @Override
     public OrderCart selectOrderCartById(Integer cartId) throws Exception {
-        return dac.getEntityById(OrderCart.class, cartId);
+        String sql = "select id, product_id as productId, amount, price, user_id as userId, is_selected as isSelected, " +
+                     "product_name as productName, product_pic as productPic, delFlag, createdBy, createdTime, " +
+                     "updatedBy, updatedTime, remark from order_cart where id = ? and delFlag = 0";
+        return new ObjectUtil<OrderCart>().getOne(sql, OrderCart.class, cartId);
     }
 
     @Override
     public List<OrderCart> selectOrderCartByUserId(Integer userId) {
-        String sql = "select * from order_cart where user_id = ? and delFlag = 0 order by createdTime desc";
+        String sql = "select id, product_id as productId, amount, price, user_id as userId, is_selected as isSelected, " +
+                     "product_name as productName, product_pic as productPic, delFlag, createdBy, createdTime, " +
+                     "updatedBy, updatedTime, remark from order_cart where user_id = ? and delFlag = 0 order by createdTime desc";
         return new ObjectUtil<OrderCart>().getList(sql, OrderCart.class, userId);
     }
 
     @Override
     public OrderCart selectOrderCartByUserIdAndProductId(Integer userId, String productId) {
-        String sql = "select * from order_cart where user_id = ? and product_id = ? and delFlag = 0";
+        String sql = "select id, product_id as productId, amount, price, user_id as userId, is_selected as isSelected, " +
+                     "product_name as productName, product_pic as productPic, delFlag, createdBy, createdTime, " +
+                     "updatedBy, updatedTime, remark from order_cart where user_id = ? and product_id = ? and delFlag = 0";
         return new ObjectUtil<OrderCart>().getOne(sql, OrderCart.class, userId, productId);
     }
 
     @Override
     public List<OrderCart> selectSelectedOrderCartByUserId(Integer userId) {
-        String sql = "select * from order_cart where user_id = ? and is_selected = 1 and delFlag = 0";
+        String sql = "select id, product_id as productId, amount, price, user_id as userId, is_selected as isSelected, " +
+                     "product_name as productName, product_pic as productPic, delFlag, createdBy, createdTime, " +
+                     "updatedBy, updatedTime, remark from order_cart where user_id = ? and is_selected = 1 and delFlag = 0";
         return new ObjectUtil<OrderCart>().getList(sql, OrderCart.class, userId);
     }
 
@@ -120,7 +129,9 @@ public class OrderCartDaoImpl implements OrderCartDao {
      * @return 购物车列表
      */
     private List<OrderCart> selectOrderCartByProductId(String productId) {
-        String sql = "select * from order_cart where product_id = ? and delFlag = 0";
+        String sql = "select id, product_id as productId, amount, price, user_id as userId, is_selected as isSelected, " +
+                     "product_name as productName, product_pic as productPic, delFlag, createdBy, createdTime, " +
+                     "updatedBy, updatedTime, remark from order_cart where product_id = ? and delFlag = 0";
         return new ObjectUtil<OrderCart>().getList(sql, OrderCart.class, productId);
     }
 
@@ -131,7 +142,9 @@ public class OrderCartDaoImpl implements OrderCartDao {
      * @return 购物车列表
      */
     private List<OrderCart> selectOrderCartByProductName(String productName) {
-        String sql = "select * from order_cart where product_name like ? and delFlag = 0";
+        String sql = "select id, product_id as productId, amount, price, user_id as userId, is_selected as isSelected, " +
+                     "product_name as productName, product_pic as productPic, delFlag, createdBy, createdTime, " +
+                     "updatedBy, updatedTime, remark from order_cart where product_name like ? and delFlag = 0";
         return new ObjectUtil<OrderCart>().getList(sql, OrderCart.class, "%" + productName + "%");
     }
 
@@ -143,7 +156,9 @@ public class OrderCartDaoImpl implements OrderCartDao {
      * @return 购物车列表
      */
     private List<OrderCart> selectOrderCartByUserIdAndSelected(Integer userId, Boolean isSelected) {
-        String sql = "select * from order_cart where user_id = ? and is_selected = ? and delFlag = 0";
+        String sql = "select id, product_id as productId, amount, price, user_id as userId, is_selected as isSelected, " +
+                     "product_name as productName, product_pic as productPic, delFlag, createdBy, createdTime, " +
+                     "updatedBy, updatedTime, remark from order_cart where user_id = ? and is_selected = ? and delFlag = 0";
         return new ObjectUtil<OrderCart>().getList(sql, OrderCart.class, userId, isSelected ? 1 : 0);
     }
 

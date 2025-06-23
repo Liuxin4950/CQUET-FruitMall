@@ -11,6 +11,7 @@ import org.example.emarketmall.service.OrdersService;
 import org.example.emarketmall.utils.DateUtils;
 import org.example.emarketmall.utils.StringUtils;
 
+import javax.servlet.http.HttpSession;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -77,7 +78,9 @@ public class OrdersServiceImpl implements OrdersService {
     @Override
     public List<OrdersResl> selectOrdersByUserId(Integer userId) {
         try {
-            return ordersDao.selectOrdersByUserId(userId);
+            List<OrdersResl> ordersResls = ordersDao.selectOrdersByUserId(userId);
+            System.out.println("查询用户订单结果: " + ordersResls);
+            return ordersResls;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -181,8 +184,8 @@ public class OrdersServiceImpl implements OrdersService {
             orders.setId(orderId);
             orders.setOrderStatus(5); // 已取消
             orders.setUpdatedTime(DateUtils.getTime());
-
             int result = ordersDao.updateOrders(orderId, orders);
+            System.out.println("取消订单结果: " + result);
             return result > 0;
         } catch (Exception e) {
             e.printStackTrace();

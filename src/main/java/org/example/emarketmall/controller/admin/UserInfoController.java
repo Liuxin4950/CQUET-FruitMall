@@ -137,6 +137,7 @@ public class UserInfoController extends HttpServlet {
             destUser.setLoginName(user.getLoginName());
             destUser.setPhone(user.getPhone());
             destUser.setEmail(user.getEmail());
+            destUser.setAddress(user.getAddress());
             if (userInfoService.updateUserInfo(destUser) > 0) {
                 return AjaxResult.success("修改用户信息成功");
             }

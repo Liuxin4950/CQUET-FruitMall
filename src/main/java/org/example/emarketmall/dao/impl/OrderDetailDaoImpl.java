@@ -4,11 +4,14 @@ import cquet.aibd.soft.ObjectUtil;
 import org.example.emarketmall.dao.IDataAccess;
 import org.example.emarketmall.dao.OrderDetailDao;
 import org.example.emarketmall.entity.OrderDetail;
+import org.example.emarketmall.entity.ProductInfo;
 import org.example.emarketmall.utils.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 订单详情数据访问实现类
@@ -89,8 +92,26 @@ public class OrderDetailDaoImpl implements OrderDetailDao {
 
     @Override
     public List<OrderDetail> selectOrderDetailByOrderId(Integer orderId) {
+        // 先查询基本的订单详情
         String sql = "select * from order_detail where order_id = ? and delFlag = 0";
-        return new ObjectUtil<OrderDetail>().getList(sql, OrderDetail.class, orderId);
+        List<OrderDetail> orderDetails = new ObjectUtil<OrderDetail>().getList(sql, OrderDetail.class, orderId);
+        
+        // 为每个订单详情补充商品信息
+        for (OrderDetail detail : orderDetails) {
+            if (detail.getProductId() != null) {
+                try {
+                    String productSql = "select * from product_info where id = ?";
+                    List<ProductInfo> products = new ObjectUtil<ProductInfo>().getList(productSql, ProductInfo.class, detail.getProductId());
+                    if (!products.isEmpty()) {
+                        detail.setProductInfo(products.get(0));
+                    }
+                } catch (Exception e) {
+                    System.err.println("查询商品信息失败: " + e.getMessage());
+                }
+            }
+        }
+        
+        return orderDetails;
     }
 
     @Override

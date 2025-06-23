@@ -51,6 +51,10 @@
                                     <input type="text" name="email" id="email"/>
                                 </li>
                                 <li>
+                                    <label>地址：</label>
+                                    <input type="text" name="address" id="address"/>
+                                </li>
+                                <li>
                                     <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()">
                                         <i class="fa fa-search"></i>&nbsp;搜索</a>
                                     <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()">
@@ -104,12 +108,14 @@
         let loginNameVal = $("#loginName").val().trim();
         let phoneVal = $("#phone").val().trim();
         let emailVal = $("#email").val().trim();
+        let addressVal = $("#address").val().trim();
 
         var customParams = {};
         if (nameVal) customParams.name = nameVal;
         if (loginNameVal) customParams.loginName = loginNameVal;
         if (phoneVal) customParams.phone = phoneVal;
         if (emailVal) customParams.email = emailVal;
+        if (addressVal) customParams.address = addressVal;
 
         // 通过表格刷新触发 queryParams
         $('#bootstrap-table').bootstrapTable('refresh', {
@@ -158,6 +164,10 @@
                 {
                     field: 'email',
                     title: '电子邮箱'
+                },
+                {
+                    field: 'address',
+                    title: '地址'
                 },
                 {
                     field: 'avatar',

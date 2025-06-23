@@ -49,7 +49,21 @@ public class OrderCartServiceImpl implements OrderCartService {
     @Override
     public List<OrderCart> selectOrderCartByUserId(Integer userId) {
         try {
-            return orderCartDao.selectOrderCartByUserId(userId);
+            List<OrderCart> cartList = orderCartDao.selectOrderCartByUserId(userId);
+//            System.out.println("查询到的购物车列表: " + cartList);
+            // 为每个购物车项关联商品详细信息
+            if (cartList != null && !cartList.isEmpty()) {
+                for (OrderCart cart : cartList) {
+                    try {
+                        ProductInfo productInfo = productInfoService.selectProductInfoById(Integer.parseInt(cart.getProductId()));
+                        cart.setProductInfo(productInfo);
+                    } catch (Exception e) {
+                        System.err.println("关联商品信息失败，商品ID: " + cart.getProductId() + ", 错误: " + e.getMessage());
+                        // 即使关联失败，也不影响其他数据的返回
+                    }
+                }
+            }
+            return cartList;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -207,8 +221,7 @@ public class OrderCartServiceImpl implements OrderCartService {
             }
             
             // 调用完整版本的addToCart方法
-            return addToCart(userId, productId, amount, productInfo.getPrice(), 
-                           productInfo.getProductName(), productInfo.getImageUrl());
+            return addToCart(userId, productId, amount, productInfo.getPrice(), productInfo.getProductName(), productInfo.getImageUrl());
         } catch (Exception e) {
             e.printStackTrace();
             return false;

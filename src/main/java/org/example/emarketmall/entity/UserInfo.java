@@ -14,6 +14,7 @@ public class UserInfo extends BaseEntity {
     private String email;
     private String phone;
     private String password;
+    private String address;
 
     public UserInfo() {
     }
@@ -23,6 +24,14 @@ public class UserInfo extends BaseEntity {
         this.loginName = loginName;
         this.phone = phone;
         this.password = password;
+    }
+
+    public UserInfo(String name, String loginName, String phone, String password, String address) {
+        this.name = name;
+        this.loginName = loginName;
+        this.phone = phone;
+        this.password = password;
+        this.address = address;
     }
 
     public String getName() {
@@ -73,6 +82,14 @@ public class UserInfo extends BaseEntity {
         this.password = password;
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
     @Override
     public String toString() {
         return "UserInfo{" +
@@ -83,6 +100,7 @@ public class UserInfo extends BaseEntity {
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
                 ", password='" + password + '\'' +
+                ", address='" + address + '\'' +
                 ", delFlag=" + getDelFlag() +
                 ", createBy='" + getCreatedBy() + '\'' +
                 ", createTime='" + getCreatedTime() + '\'' +

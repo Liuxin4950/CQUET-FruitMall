@@ -46,6 +46,12 @@
                 <input name="email" class="form-control" value="${user.email}" type="text" readonly>
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">地址：</label>
+            <div class="col-sm-8">
+                <input name="address" class="form-control" value="${user.address}" type="text" readonly>
+            </div>
+        </div>
     </form>
 </div>
 <script type="text/javascript" src="../../static/js/common/common-js.js"></script>

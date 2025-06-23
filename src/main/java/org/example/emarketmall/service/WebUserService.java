@@ -65,4 +65,13 @@ public interface WebUserService {
      * @throws Exception
      */
     boolean updateLastLoginTime(Integer userId) throws Exception;
+    
+    /**
+     * 更新用户默认地址
+     * @param userId 用户ID
+     * @param address 默认地址
+     * @return 操作结果
+     * @throws Exception
+     */
+    boolean updateUserDefaultAddress(Integer userId, String address) throws Exception;
 }

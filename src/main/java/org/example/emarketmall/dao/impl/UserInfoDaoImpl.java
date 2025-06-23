@@ -45,7 +45,7 @@ public class UserInfoDaoImpl implements UserInfoDao {
 
         List<UserInfo> userInfoList = new ArrayList<>();
         //是否输入了多个查询条件
-        List<String> params = Arrays.asList("id", "name", "loginName", "email", "phone");
+        List<String> params = Arrays.asList("id", "name", "loginName", "email", "phone", "address");
 
         for (String p : params) {
             switch (p) {
@@ -74,6 +74,12 @@ public class UserInfoDaoImpl implements UserInfoDao {
                     if (StringUtils.isNotEmpty(userInfo.getName())) {
                         userInfoList = selectUserInfoByName(userInfo.getName());
                     }
+                    break;
+                case "address":
+                    if (StringUtils.isNotEmpty(userInfo.getAddress())) {
+                        userInfoList = selectUserInfoByAddress(userInfo.getAddress());
+                    }
+                    break;
                 default:
                     break;
             }
@@ -116,6 +122,11 @@ public class UserInfoDaoImpl implements UserInfoDao {
         return new ObjectUtil<UserInfo>().getList(sql, UserInfo.class, "%" + name + "%");
     }
 
+    public List<UserInfo> selectUserInfoByAddress(String address) {
+        String sql = "select * from user_info WHERE address like ? and delFlag= 0";
+        return new ObjectUtil<UserInfo>().getList(sql, UserInfo.class, "%" + address + "%");
+    }
+
     @Override
     public int deleteUserInfoById(Integer userInfoId) {
         //软删，修改delFlag字段
@@ -129,21 +140,21 @@ public class UserInfoDaoImpl implements UserInfoDao {
             return 0;
         }
         //更新的数据和set后面的字段名一一对应
-        String sql = "update user_info set name=?,loginName=?,password=?,phone=?,email=?,avatar=?," +
+        String sql = "update user_info set name=?,loginName=?,password=?,phone=?,email=?,avatar=?,address=?," +
                 "createdBy=?,createdTime=?,updatedBy=?,updatedTime=?,delFlag=?,remark=? where id=?";
-        return new ObjectUtil<UserInfo>().update(sql, userInfo.getName(), userInfo.getLoginName(), userInfo.getPassword(), userInfo.getPhone(), userInfo.getEmail(), userInfo.getAvatar(),
+        return new ObjectUtil<UserInfo>().update(sql, userInfo.getName(), userInfo.getLoginName(), userInfo.getPassword(), userInfo.getPhone(), userInfo.getEmail(), userInfo.getAvatar(), userInfo.getAddress(),
                 userInfo.getCreatedBy(), userInfo.getCreatedTime(), userInfo.getUpdatedBy(), userInfo.getUpdatedTime(), userInfo.getDelFlag(), userInfo.getRemark(), id);
     }
 
     @Override
     public int insertUserInfo(UserInfo userInfo) {
-        //user_info　13个字段,填写12个,id自动
-        String sql = "insert into user_info(`name`,`loginName`,`password`,`phone`,`email`,`avatar`,`createdBy`,`createdTime`,`updatedBy`,`updatedTime`,`delFlag`,`remark`) value(?,?,?,?,?,?,?,?,?,?,?,?)";
+        //user_info　14个字段,填写13个,id自动
+        String sql = "insert into user_info(`name`,`loginName`,`password`,`phone`,`email`,`avatar`,`address`,`createdBy`,`createdTime`,`updatedBy`,`updatedTime`,`delFlag`,`remark`) value(?,?,?,?,?,?,?,?,?,?,?,?,?)";
         if (userInfo == null) {
             return 0;
         }
         return new ObjectUtil<UserInfo>().add(sql, userInfo.getName(), userInfo.getLoginName(), userInfo.getPassword(),
-                userInfo.getPhone(), userInfo.getEmail(), userInfo.getAvatar(),
+                userInfo.getPhone(), userInfo.getEmail(), userInfo.getAvatar(), userInfo.getAddress(),
                 userInfo.getCreatedBy(), userInfo.getCreatedTime(), userInfo.getUpdatedBy(),
                 userInfo.getUpdatedTime(), userInfo.getDelFlag(), userInfo.getRemark());
     }

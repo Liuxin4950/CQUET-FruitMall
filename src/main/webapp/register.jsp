@@ -2,55 +2,57 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <title>注册EmarketMall系统</title>
-    <meta name="description" content="EmarketMall系统">
+    <title>注册向日葵水果商城</title>
+    <meta name="description" content="向日葵水果商城">
     <!-- 引入统一资源管理 -->
     <%@ include file="common/resources.jsp" %>
-    <link href="${ctx}/static/css/login.min.css" rel="stylesheet"/>
+    <link href="${ctx}/static/css/fruit-login.css" rel="stylesheet"/>
     <link href="${ctx}/static/ajax/easy-ui/easy-ui.css" rel="stylesheet"/>
 </head>
-<body class="signin">
-<div class="signinpanel">
+<body class="fruit-signin">
+<div class="fruit-signinpanel">
     <div class="row">
         <div class="col-sm-7">
-            <div class="signin-info">
+            <div class="fruit-signin-info">
                 <div class="m-b"></div>
-                <h4>欢迎使用 <strong>后台管理系统</strong></h4>
+                <h4>加入 <strong class="brand-name">向日葵</strong> 水果商城</h4>
                 <ul class="m-b">
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> SpringBoot</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Mybatis</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Shiro</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Thymeleaf</li>
-                    <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> Bootstrap</li>
+                    <li>新鲜水果，每日直达</li>
+                    <li>品质保证，源头直供</li>
+                    <li>营养健康，美味生活</li>
+                    <li>便捷购物，贴心服务</li>
+                    <li>绿色环保，自然之选</li>
                 </ul>
-                <strong>已经注册过? <a href="${ctx}/login.jsp">直接登录&raquo;</a></strong>
+                <strong>已经注册过? <a href="${ctx}/login.jsp">直接登录，开始购物&raquo;</a></strong>
             </div>
         </div>
         <div class="col-sm-5">
-            <form id="registerForm" autocomplete="off" method="post">
-                <h4 class="no-margins">注册：</h4>
-                <p class="m-t-md">When we let go of something, it opens up a little space to grow.<br/>学会放手的同时也学会成长。
-                </p>
-                <input type="text" name="loginName" class="form-control uname" placeholder="登录名" maxlength="20"/>
-                <input type="password" name="password" class="form-control pword" placeholder="密码" maxlength="20" value="123456"/>
-                <input type="password" name="confirmPassword" class="form-control pword" placeholder="确认密码"
-                       maxlength="20" value="123456"/>
-                <input type="text" name="phone" class="form-control uname" placeholder="电话" maxlength="20"
-                       value="13912345678"/>
-                <br/>
-                <div class="checkbox-custom">
-                    <input type="checkbox" id="acceptTerm" name="acceptTerm"> <label
-                        for="acceptTerm">我已阅读并同意</label>
-                </div>
-                <button class="btn btn-success btn-block" id="btnSubmit" type="button" onclick="register()"
-                        data-loading="正在验证注册，请稍后...">注册
-                </button>
-            </form>
+            <div class="fruit-form-container">
+                <form id="registerForm" autocomplete="off" method="post">
+                    <h4 class="no-margins">用户注册</h4>
+                    <p class="m-t-md">🌻 注册成为会员，享受更多优惠 🌻
+                    </p>
+                    <input type="text" name="loginName" class="fruit-form-control uname" placeholder="请输入登录名" maxlength="20"/>
+                    <input type="password" name="password" class="fruit-form-control pword" placeholder="请输入密码" maxlength="20" value="123456"/>
+                    <input type="password" name="confirmPassword" class="fruit-form-control pword" placeholder="请确认密码"
+                           maxlength="20" value="123456"/>
+                    <input type="text" name="phone" class="fruit-form-control phone" placeholder="请输入手机号" maxlength="20"
+                           value="13912345678"/>
+                    <br/>
+                    <div class="fruit-checkbox">
+                        <input type="checkbox" id="acceptTerm" name="acceptTerm"> <label
+                            for="acceptTerm">我已阅读并同意用户协议</label>
+                    </div>
+                    <button class="fruit-btn" id="btnSubmit" type="button" onclick="register()"
+                            data-loading="正在验证注册，请稍后...">立即注册
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
-    <div class="signup-footer">
+    <div class="fruit-footer">
         <div class="pull-left">
-            &copy; 2019 All Rights Reserved. <br>
+            &copy; 2024 向日葵水果商城 All Rights Reserved. <br>
         </div>
     </div>
 </div>

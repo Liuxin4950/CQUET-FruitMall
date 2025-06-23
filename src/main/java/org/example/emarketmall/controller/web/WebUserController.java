@@ -2,6 +2,7 @@ package org.example.emarketmall.controller.web;
 
 import com.alibaba.fastjson.JSON;
 import org.example.emarketmall.common.AjaxResult;
+import org.example.emarketmall.entity.UserInfo;
 import org.example.emarketmall.req.UserUpdateReq;
 import org.example.emarketmall.resl.UserInfoResl;
 import org.example.emarketmall.service.WebUserService;
@@ -75,6 +76,10 @@ public class WebUserController extends HttpServlet {
                     // 更新最后登录时间
                     handleUpdateLoginTime(req, resp);
                     break;
+                case "updateDefaultAddress":
+                    // 更新用户默认地址
+                    handleUpdateDefaultAddress(req, resp);
+                    break;
                 default:
                     ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("不支持的操作类型: " + opt)));
                     break;
@@ -91,22 +96,8 @@ public class WebUserController extends HttpServlet {
      */
     private void handleUserInfo(HttpServletRequest req, HttpServletResponse resp, String id, String loginName) throws Exception {
         UserInfoResl userInfo = null;
-        
-        if (!StringUtils.isEmpty(id)) {
-            try {
-                Integer userId = Integer.parseInt(id);
-                userInfo = webUserService.selectUserInfoById(userId);
-            } catch (NumberFormatException e) {
-                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("用户ID格式不正确")));
-                return;
-            }
-        } else if (!StringUtils.isEmpty(loginName)) {
-            userInfo = webUserService.selectUserInfoByLoginName(loginName);
-        } else {
-            ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("用户ID或登录名不能为空")));
-            return;
-        }
-        
+        HttpSession session = req.getSession();
+        userInfo = (UserInfoResl) session.getAttribute("userInfo");
         ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.success(userInfo)));
     }
     
@@ -146,9 +137,10 @@ public class WebUserController extends HttpServlet {
     private void handleUpdateUserInfo(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         // 检查用户是否登录
         HttpSession session = req.getSession();
-        Object userIdObj = session.getAttribute("userId");
+        UserInfo userInfo = (UserInfo) session.getAttribute("userInfo");
+        System.out.println("用户信息: " + userInfo);
         
-        if (userIdObj == null) {
+        if (userInfo == null) {
             ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("用户未登录")));
             return;
         }
@@ -157,13 +149,13 @@ public class WebUserController extends HttpServlet {
         if (userUpdateReq == null) {
             // 从URL参数获取更新信息
             userUpdateReq = new UserUpdateReq();
-            String name = req.getParameter("name");
+            String name = userInfo.getId() != null ? userInfo.getName() : null;
             String nickname = req.getParameter("nickname");
             String avatar = req.getParameter("avatar");
             String email = req.getParameter("email");
             String phone = req.getParameter("phone");
             
-            userUpdateReq.setId(Integer.parseInt(userIdObj.toString()));
+            userUpdateReq.setUserId(Integer.parseInt(userInfo.getId().toString()));
             if (!StringUtils.isEmpty(name)) {
                 userUpdateReq.setName(name);
             }
@@ -181,7 +173,7 @@ public class WebUserController extends HttpServlet {
             }
         } else {
             // 确保更新的是当前登录用户的信息
-            userUpdateReq.setId(Integer.parseInt(userIdObj.toString()));
+            userUpdateReq.setUserId(Integer.parseInt(userInfo.getId().toString()));
         }
         
         boolean result = webUserService.updateUserInfo(userUpdateReq);
@@ -213,13 +205,13 @@ public class WebUserController extends HttpServlet {
             String newPassword = req.getParameter("newPassword");
             String confirmNewPassword = req.getParameter("confirmNewPassword");
             
-            userUpdateReq.setId(Integer.parseInt(userIdObj.toString()));
+            userUpdateReq.setUserId(Integer.parseInt(userIdObj.toString()));
             userUpdateReq.setOldPassword(oldPassword);
             userUpdateReq.setNewPassword(newPassword);
             userUpdateReq.setConfirmPassword(confirmNewPassword);
         } else {
             // 确保更新的是当前登录用户的密码
-            userUpdateReq.setId(Integer.parseInt(userIdObj.toString()));
+            userUpdateReq.setUserId(Integer.parseInt(userIdObj.toString()));
         }
         
         boolean result = webUserService.updateUserPassword(userUpdateReq);
@@ -250,6 +242,38 @@ public class WebUserController extends HttpServlet {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.success("登录时间更新成功")));
             } else {
                 ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("登录时间更新失败")));
+            }
+        } catch (NumberFormatException e) {
+            ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("用户ID格式不正确")));
+        }
+    }
+    
+    /**
+     * 处理更新用户默认地址
+     */
+    private void handleUpdateDefaultAddress(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        // 检查用户是否登录
+        HttpSession session = req.getSession();
+        Object userIdObj = session.getAttribute("userId");
+        
+        if (userIdObj == null) {
+            ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("用户未登录")));
+            return;
+        }
+        
+        String address = req.getParameter("address");
+        if (StringUtils.isEmpty(address)) {
+            ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("地址信息不能为空")));
+            return;
+        }
+        
+        try {
+            Integer userId = Integer.parseInt(userIdObj.toString());
+            boolean result = webUserService.updateUserDefaultAddress(userId, address);
+            if (result) {
+                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.success("默认地址更新成功")));
+            } else {
+                ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("默认地址更新失败")));
             }
         } catch (NumberFormatException e) {
             ServletUtils.renderString(resp, JSON.toJSONString(AjaxResult.error("用户ID格式不正确")));

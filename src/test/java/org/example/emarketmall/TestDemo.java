@@ -45,6 +45,7 @@ public class TestDemo {
         List<String> properties = BeanUtils.getBeanProperties(new UserInfo());
         properties.forEach(System.out::println);
 
+
     }
 
     @Test

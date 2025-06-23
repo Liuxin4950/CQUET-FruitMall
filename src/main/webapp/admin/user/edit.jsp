@@ -46,6 +46,12 @@
                 <input name="email" class="form-control" value="${user.email}" type="text">
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label">地址：</label>
+            <div class="col-sm-8">
+                <input name="address" class="form-control" value="${user.address}" type="text" placeholder="请输入用户地址">
+            </div>
+        </div>
     </form>
 </div>
 <!-- 全局js -->

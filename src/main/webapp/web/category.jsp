@@ -157,38 +157,108 @@
         }
         .fruit-actions {
             display: flex;
-            gap: 10px;
+            gap: 4px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         .btn-add-cart {
-            flex: 1;
             background: #27ae60;
             border: none;
             color: white;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            flex: 1;
+            min-width: 60px;
+            transition: all 0.3s ease;
             font-weight: 500;
-            transition: background 0.3s ease;
         }
         .btn-add-cart:hover {
             background: #219a52;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .btn-quick-view {
+        .btn-detail {
             background: #3498db;
             border: none;
             color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            transition: background 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            flex: 1;
+            min-width: 60px;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
-        .btn-quick-view:hover {
+        .btn-detail:hover {
             background: #2980b9;
             color: white;
-        }
-        
-        .fruit-actions .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .btn-buy {
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            flex: 1;
+            min-width: 60px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-buy:hover {
+            background: #c0392b;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        /* 星级评分样式 */
+        .product-rating {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .stars {
+            color: #f39c12;
+            margin-right: 5px;
+        }
+        
+        /* 商品元数据样式 */
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: #95a5a6;
+        }
+        
+        /* 商品详情模态框样式 */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+        }
+        .modal-header .close {
+            color: white;
+            opacity: 0.8;
+            text-shadow: none;
+        }
+        .modal-header .close:hover {
+            opacity: 1;
+        }
+        .modal-body {
+            padding: 30px;
         }
         
         /* 分类区域显示控制 */
@@ -274,18 +344,134 @@
     <div class="category-nav">
         <div class="container">
             <div class="category-tabs">
-                <a href="#" class="category-tab active" onclick="showCategory('citrus')">🍊 柑橘类</a>
+                <a href="#" class="category-tab active" onclick="showCategory('apple')">🍎 苹果类</a>
+                <a href="#" class="category-tab" onclick="showCategory('banana')">🍌 香蕉类</a>
+                <a href="#" class="category-tab" onclick="showCategory('citrus')">🍊 柑橘类</a>
                 <a href="#" class="category-tab" onclick="showCategory('berry')">🍓 浆果类</a>
                 <a href="#" class="category-tab" onclick="showCategory('tropical')">🥭 热带水果</a>
                 <a href="#" class="category-tab" onclick="showCategory('stone')">🍑 核果类</a>
                 <a href="#" class="category-tab" onclick="showCategory('melon')">🍉 瓜果类</a>
-                <a href="#" class="category-tab" onclick="showCategory('all')">🍎 全部分类</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 苹果类 -->
+    <div id="apple" class="category-section active">
+        <div class="container">
+            <h2 class="section-title">🍎 苹果类水果</h2>
+            <div class="category-intro">
+                <div class="intro-icon" style="color: #e74c3c;">
+                    <i class="fa fa-apple"></i>
+                </div>
+                <div class="intro-text">
+                    苹果类水果营养丰富，口感清脆，富含膳食纤维和维生素，是健康生活的理想选择。我们精选优质苹果，确保每一颗都新鲜可口。
+                </div>
+            </div>
+            <div class="fruit-grid">
+                <div class="fruit-card">
+                    <div class="fruit-image" style="background: linear-gradient(45deg, #27ae60, #2ecc71);">
+                        <div class="fruit-badge">有机</div>
+                        <i class="fa fa-apple" style="color: #27ae60;"></i>
+                    </div>
+                    <div class="fruit-info">
+                        <div class="fruit-name">有机苹果</div>
+                        <div class="fruit-desc">有机种植苹果，无农药残留，口感清脆，营养丰富，适合全家食用</div>
+                        <div class="fruit-features">
+                            <span class="feature-tag">有机认证</span>
+                            <span class="feature-tag">清脆</span>
+                            <span class="feature-tag">营养丰富</span>
+                        </div>
+                        <div class="fruit-price">
+                            <span class="price-current">¥25.80</span>
+                            <span class="price-unit">/3斤装</span>
+                        </div>
+                        <div class="fruit-actions">
+                            <button class="btn btn-add-cart">
+                                <i class="fa fa-cart-plus"></i> 加入购物车
+                            </button>
+                            <button class="btn btn-quick-view">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="fruit-card">
+                    <div class="fruit-image" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+                        <div class="fruit-badge">热销</div>
+                        <i class="fa fa-apple" style="color: #e74c3c;"></i>
+                    </div>
+                    <div class="fruit-info">
+                        <div class="fruit-name">红富士苹果</div>
+                        <div class="fruit-desc">经典红富士苹果，果肉紧实，甜度适中，是最受欢迎的苹果品种之一</div>
+                        <div class="fruit-features">
+                            <span class="feature-tag">经典品种</span>
+                            <span class="feature-tag">紧实</span>
+                            <span class="feature-tag">甜度适中</span>
+                        </div>
+                        <div class="fruit-price">
+                            <span class="price-current">¥22.80</span>
+                            <span class="price-unit">/3斤装</span>
+                        </div>
+                        <div class="fruit-actions">
+                            <button class="btn btn-add-cart">
+                                <i class="fa fa-cart-plus"></i> 加入购物车
+                            </button>
+                            <button class="btn btn-quick-view">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 香蕉类 -->
+    <div id="banana" class="category-section">
+        <div class="container">
+            <h2 class="section-title">🍌 香蕉类水果</h2>
+            <div class="category-intro">
+                <div class="intro-icon" style="color: #f1c40f;">
+                    <i class="fa fa-moon-o"></i>
+                </div>
+                <div class="intro-text">
+                    香蕉类水果富含钾元素和维生素B6，口感香甜，是运动前后的理想补充。我们的香蕉新鲜进口，确保最佳的成熟度和口感。
+                </div>
+            </div>
+            <div class="fruit-grid">
+                <div class="fruit-card">
+                    <div class="fruit-image" style="background: linear-gradient(45deg, #f1c40f, #f39c12);">
+                        <div class="fruit-badge">进口</div>
+                        <i class="fa fa-moon-o" style="color: #f1c40f;"></i>
+                    </div>
+                    <div class="fruit-info">
+                        <div class="fruit-name">进口香蕉</div>
+                        <div class="fruit-desc">进口优质香蕉，果肉香甜，富含钾元素，是健康生活的理想选择</div>
+                        <div class="fruit-features">
+                            <span class="feature-tag">进口</span>
+                            <span class="feature-tag">香甜</span>
+                            <span class="feature-tag">富含钾</span>
+                        </div>
+                        <div class="fruit-price">
+                            <span class="price-current">¥18.80</span>
+                            <span class="price-unit">/2斤装</span>
+                        </div>
+                        <div class="fruit-actions">
+                            <button class="btn btn-add-cart">
+                                <i class="fa fa-cart-plus"></i> 加入购物车
+                            </button>
+                            <button class="btn btn-quick-view">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- 柑橘类 -->
-    <div id="citrus" class="category-section active">
+    <div id="citrus" class="category-section">
         <div class="container">
             <h2 class="section-title">🍊 柑橘类水果</h2>
             <div class="category-intro">
@@ -531,99 +717,13 @@
         </div>
     </div>
 
-    <!-- 全部分类 -->
-    <div id="all" class="category-section">
-        <div class="container">
-            <h2 class="section-title">🍎 全部水果分类</h2>
-            <div class="category-intro">
-                <div class="intro-icon" style="color: #3498db;">
-                    <i class="fa fa-th-large"></i>
-                </div>
-                <div class="intro-text">
-                    这里汇集了我们所有的水果分类，您可以根据自己的喜好和需求选择合适的水果。我们承诺所有水果都是新鲜采摘，品质保证。
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-2 col-sm-4 col-6 mb-4">
-                    <div class="text-center">
-                        <div style="font-size: 60px; color: #f39c12; margin-bottom: 15px;">
-                            <i class="fa fa-circle"></i>
-                        </div>
-                        <h5>柑橘类</h5>
-                        <p class="text-muted">橙子、柠檬、柚子等</p>
-                        <button class="btn btn-outline-warning btn-sm" onclick="showCategory('citrus')">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6 mb-4">
-                    <div class="text-center">
-                        <div style="font-size: 60px; color: #e74c3c; margin-bottom: 15px;">
-                            <i class="fa fa-heart"></i>
-                        </div>
-                        <h5>浆果类</h5>
-                        <p class="text-muted">草莓、蓝莓、黑莓等</p>
-                        <button class="btn btn-outline-danger btn-sm" onclick="showCategory('berry')">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6 mb-4">
-                    <div class="text-center">
-                        <div style="font-size: 60px; color: #f39c12; margin-bottom: 15px;">
-                            <i class="fa fa-leaf"></i>
-                        </div>
-                        <h5>热带水果</h5>
-                        <p class="text-muted">芒果、火龙果、菠萝等</p>
-                        <button class="btn btn-outline-warning btn-sm" onclick="showCategory('tropical')">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6 mb-4">
-                    <div class="text-center">
-                        <div style="font-size: 60px; color: #e74c3c; margin-bottom: 15px;">
-                            <i class="fa fa-heart"></i>
-                        </div>
-                        <h5>核果类</h5>
-                        <p class="text-muted">车厘子、桃子、李子等</p>
-                        <button class="btn btn-outline-danger btn-sm" onclick="showCategory('stone')">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6 mb-4">
-                    <div class="text-center">
-                        <div style="font-size: 60px; color: #27ae60; margin-bottom: 15px;">
-                            <i class="fa fa-circle"></i>
-                        </div>
-                        <h5>瓜果类</h5>
-                        <p class="text-muted">西瓜、哈密瓜、甜瓜等</p>
-                        <button class="btn btn-outline-success btn-sm" onclick="showCategory('melon')">
-                            查看详情
-                        </button>
-                    </div>
-                </div>
-                <div class="col-md-2 col-sm-4 col-6 mb-4">
-                    <div class="text-center">
-                        <div style="font-size: 60px; color: #9b59b6; margin-bottom: 15px;">
-                            <i class="fa fa-gift"></i>
-                        </div>
-                        <h5>礼品装</h5>
-                        <p class="text-muted">精美包装，送礼首选</p>
-                        <a href="gift.jsp" class="btn btn-outline-primary btn-sm">
-                            查看详情
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- 引入通用页脚 -->
     <%@ include file="../common/footer.jsp" %>
     
     <script>
+
         // 全局配置变量
         window.contextPath = '${ctx}';
         window.isUserLoggedIn = <%= session.getAttribute("loginName") != null %>;

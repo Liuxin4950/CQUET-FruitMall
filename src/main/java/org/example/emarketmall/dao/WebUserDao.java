@@ -77,4 +77,13 @@ public interface WebUserDao {
      * @throws Exception
      */
     boolean checkPhoneExists(String phone, Integer excludeUserId) throws Exception;
+    
+    /**
+     * 更新用户默认地址
+     * @param userId 用户ID
+     * @param address 默认地址
+     * @return 影响行数
+     * @throws Exception
+     */
+    int updateUserDefaultAddress(Integer userId, String address) throws Exception;
 }

@@ -24,9 +24,9 @@ public class WebUserDaoImpl implements WebUserDao {
                      "COALESCE(order_stats.totalAmount, 0) as totalAmount " +
                      "FROM user_info u " +
                      "LEFT JOIN ( " +
-                     "    SELECT userId, COUNT(*) as orderCount, SUM(paymentMoney) as totalAmount " +
-                     "    FROM orders WHERE delFlag = 0 GROUP BY userId " +
-                     ") order_stats ON u.id = order_stats.userId " +
+                     "    SELECT user_id, COUNT(*) as orderCount, SUM(payment_money) as totalAmount " +
+                     "    FROM orders WHERE delFlag = 0 GROUP BY user_id " +
+                     ") order_stats ON u.id = order_stats.user_id " +
                      "WHERE u.id = ? AND u.delFlag = 0";
         
         return new ObjectUtil<UserInfoResl>().getOne(sql, UserInfoResl.class, userId);
@@ -41,9 +41,9 @@ public class WebUserDaoImpl implements WebUserDao {
                      "COALESCE(order_stats.totalAmount, 0) as totalAmount " +
                      "FROM user_info u " +
                      "LEFT JOIN ( " +
-                     "    SELECT userId, COUNT(*) as orderCount, SUM(paymentMoney) as totalAmount " +
-                     "    FROM orders WHERE delFlag = 0 GROUP BY userId " +
-                     ") order_stats ON u.id = order_stats.userId " +
+                     "    SELECT user_id, COUNT(*) as orderCount, SUM(payment_money) as totalAmount " +
+                     "    FROM orders WHERE delFlag = 0 GROUP BY user_id " +
+                     ") order_stats ON u.id = order_stats.user_id " +
                      "WHERE u.loginName = ? AND u.delFlag = 0";
         
         return new ObjectUtil<UserInfoResl>().getOne(sql, UserInfoResl.class, loginName);
@@ -143,5 +143,11 @@ public class WebUserDaoImpl implements WebUserDao {
         }
         
         return result != null && Integer.parseInt(result.toString()) > 0;
+    }
+    
+    @Override
+    public int updateUserDefaultAddress(Integer userId, String address) throws Exception {
+        String sql = "UPDATE user_info SET address = ? WHERE id = ? AND delFlag = 0";
+        return new ObjectUtil<>().update(sql, address, userId);
     }
 }

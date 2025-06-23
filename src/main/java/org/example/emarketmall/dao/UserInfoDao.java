@@ -64,6 +64,14 @@ public interface UserInfoDao {
     List<UserInfo> selectUserInfoByName(String name);
 
     /**
+     * 通过地址查询用户信息
+     *
+     * @param address 用户地址
+     * @return 用户列表
+     */
+    List<UserInfo> selectUserInfoByAddress(String address);
+
+    /**
      * 通过用户ID删除用户
      *
      * @param userInfoId 用户ID

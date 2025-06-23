@@ -54,7 +54,7 @@
         <div class="col-md-12">
             <div class="navbar-right">
                 <div style="padding: 15px 0;">
-                    <a href="#" id="msbo"><span class="glyphicon glyphicon-log-out">注销</span></a>
+                    <a href="${ctx}/login.jsp" id="msbo"><span class="glyphicon glyphicon-log-out">注销</span></a>
                 </div>
             </div>
         </div>

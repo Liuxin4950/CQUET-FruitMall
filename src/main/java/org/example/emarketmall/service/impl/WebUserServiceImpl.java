@@ -54,27 +54,28 @@ public class WebUserServiceImpl implements WebUserService {
     
     @Override
     public boolean updateUserInfo(UserUpdateReq userUpdateReq) throws Exception {
+        System.out.println("更新用户信息请求: " + userUpdateReq);
         // 验证请求参数
-        String validationMsg = validateUserUpdateReq(userUpdateReq);
-        if (validationMsg != null) {
-            throw new IllegalArgumentException(validationMsg);
-        }
+//        String validationMsg = validateUserUpdateReq(userUpdateReq);
+//        if (validationMsg != null) {
+//            throw new IllegalArgumentException(validationMsg);
+//        }
         
         // 检查邮箱是否已被其他用户使用
-        if (!StringUtils.isEmpty(userUpdateReq.getEmail())) {
-            boolean emailExists = webUserDao.checkEmailExists(userUpdateReq.getEmail(), userUpdateReq.getUserId());
-            if (emailExists) {
-                throw new RuntimeException("邮箱已被其他用户使用");
-            }
-        }
-        
-        // 检查手机号是否已被其他用户使用
-        if (!StringUtils.isEmpty(userUpdateReq.getPhone())) {
-            boolean phoneExists = webUserDao.checkPhoneExists(userUpdateReq.getPhone(), userUpdateReq.getUserId());
-            if (phoneExists) {
-                throw new RuntimeException("手机号已被其他用户使用");
-            }
-        }
+//        if (!StringUtils.isEmpty(userUpdateReq.getEmail())) {
+//            boolean emailExists = webUserDao.checkEmailExists(userUpdateReq.getEmail(), userUpdateReq.getUserId());
+//            if (emailExists) {
+//                throw new RuntimeException("邮箱已被其他用户使用");
+//            }
+//        }
+//
+//        // 检查手机号是否已被其他用户使用
+//        if (!StringUtils.isEmpty(userUpdateReq.getPhone())) {
+//            boolean phoneExists = webUserDao.checkPhoneExists(userUpdateReq.getPhone(), userUpdateReq.getUserId());
+//            if (phoneExists) {
+//                throw new RuntimeException("手机号已被其他用户使用");
+//            }
+//        }
         
         // 设置更新时间
         userUpdateReq.setUpdatedTime(DateUtils.getTime());
@@ -192,5 +193,18 @@ public class WebUserServiceImpl implements WebUserService {
         }
         
         return webUserDao.updateLastLoginTime(userId) > 0;
+    }
+    
+    @Override
+    public boolean updateUserDefaultAddress(Integer userId, String address) throws Exception {
+        if (userId == null) {
+            throw new IllegalArgumentException("用户ID不能为空");
+        }
+        
+        if (StringUtils.isEmpty(address)) {
+            throw new IllegalArgumentException("地址信息不能为空");
+        }
+        
+        return webUserDao.updateUserDefaultAddress(userId, address) > 0;
     }
 }
